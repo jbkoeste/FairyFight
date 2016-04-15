@@ -25,6 +25,12 @@ public float fieldY = fieldX * fieldRatio;
 
     @Override
     public void simpleInitApp() {
+        
+        MainMenu m = new MainMenu(assetManager,rootNode,guiViewPort,inputManager);
+        
+       
+        
+        
         Node fieldNode = new Node("fieldNode");
         Node fenceNode = new Node("fenceNode");
         Node exitNode = new Node("exit");
@@ -84,6 +90,7 @@ public float fieldY = fieldX * fieldRatio;
         exitLeft.attachChild(fenceGeom);
         Geometry fenceGeomRight = fenceGeom.clone();
         fenceGeomRight.setLocalTranslation(-fieldX-3f, 2, 8);
+        exitRight.attachChild(fenceGeomRight);
         exit.attachChild(exitLeft);
         exit.attachChild(exitRight);
         exit.attachChild(exitFront);
@@ -114,10 +121,9 @@ public float fieldY = fieldX * fieldRatio;
                 fenceLeft.attachChild(fenceGeom);
                 //fence.setMaterial(mat);
             }
-           
+            fenceRight = (Node) fenceLeft.clone();
             
             fenceLeft.setLocalTranslation(fieldX+1, 0, -fieldY+1);
-             fenceRight = (Node) fenceLeft.clone();
             fenceRight.setLocalTranslation(-fieldX-1, 0, -fieldY+1);
             fence.attachChild(fenceLeft);
             fence.attachChild(fenceRight);
