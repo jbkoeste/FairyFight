@@ -30,6 +30,22 @@ public class Main extends SimpleApplication {
 
         rootNode.attachChild(geom);
     }
+    
+    
+    public Geometry createBox(){
+        
+    }
+    public void createField(){
+        
+    }
+    
+    public void createPlayer1(){
+        
+    }
+    
+    public void createPlayer2(){
+        
+    }
 
     @Override
     public void simpleUpdate(float tpf) {
