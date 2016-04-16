@@ -58,21 +58,20 @@ public class Main extends SimpleApplication {
     private int offsetP1 = 0;
     private boolean shootPauseP1 = false;
     private long timeP1 = 0;
-     private boolean shootPauseP2 = false;
+    private boolean shootPauseP2 = false;
     private long timeP2 = 0;
     private int offsetP2 = 0;
     private int shootFrequency = 500;
     private Node shot = new Node("Shot");
     private Node fenceNode = new Node("fenceNode");
-    
     //sound
-private AudioNode shootSoundP1;
-private AudioNode shootSoundP2;
-private AudioNode collision;
-private AudioNode powerUp;
-private AudioNode menuSound;
-private AudioNode gameSound;
-private AudioNode hitSound;
+    private AudioNode shootSoundP1;
+    private AudioNode shootSoundP2;
+    private AudioNode collision;
+    private AudioNode powerUp;
+    private AudioNode menuSound;
+    private AudioNode gameSound;
+    private AudioNode hitSound;
 
     public static void main(String[] args) {
         Main app = new Main();
@@ -82,18 +81,18 @@ private AudioNode hitSound;
     @Override
     public void simpleInitApp() {
 
-   
+
         // MainMenu m = new MainMenu(assetManager,rootNode,guiViewPort,inputManager);
         rootNode.attachChild(shot);
         bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
-        pYListener pY = new pYListener(bulletAppState,rootNode);
-        
-            shot.addControl(pY);
+        pYListener pY = new pYListener(bulletAppState, rootNode);
+
+        shot.addControl(pY);
         setUpKeys();
 
         Node fieldNode = new Node("fieldNode");
-       
+
         Node exitNode = new Node("exit");
 
         flyCam.setMoveSpeed(30);
@@ -130,15 +129,15 @@ private AudioNode hitSound;
         rootNode.attachChild(field);
         rootNode.attachChild(player1);
         rootNode.attachChild(player2);
-        
-        
+
+
         // sounds  Menu Sound could also be game sound
         shootSoundP1 = new AudioNode(assetManager, "Sounds/shootplayer1.wav", false);
         rootNode.attachChild(shootSoundP1);
-        
+
         shootSoundP2 = new AudioNode(assetManager, "Sounds/shootplayer2.wav", false);
         rootNode.attachChild(shootSoundP2);
-        
+
         menuSound = new AudioNode(assetManager, "Sounds/MenuSound.wav", false);
         menuSound.setLooping(true);
         rootNode.attachChild(menuSound);
@@ -155,9 +154,9 @@ private AudioNode hitSound;
 
         powerUp = new AudioNode(assetManager, "Sounds/powerup.wav", false);
         rootNode.attachChild(shootSoundP1);
-        
+
         gameSound.play();
-        
+
         setUpCamera();
     }
 
@@ -252,7 +251,7 @@ private AudioNode hitSound;
                 } else {
                     shotAngle = 0;
                 }
-               if (shootPauseP2 == false) {
+                if (shootPauseP2 == false) {
                     makeShotP2(shotAngle);
                     shootPauseP2 = true;
 
@@ -361,7 +360,7 @@ private AudioNode hitSound;
         Node field = new Node("field");
         Geometry fieldBottomPlayer1 = createBox(fieldX, 1, fieldY, "Field_p1");
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        
+
         Material tex_mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         TextureKey key = new TextureKey("Textures/gras.png");
         key.setGenerateMips(true);
@@ -425,33 +424,33 @@ private AudioNode hitSound;
         Node fence = new Node("fence");
         Node fenceLeft = new Node("fenceLeft");
         Node fenceRight = new Node("fenceRight");
-        
+
         Material tex_mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         TextureKey key = new TextureKey("Textures/ziegel.png");
         key.setGenerateMips(true);
         Texture tex2 = assetManager.loadTexture(key);
         tex_mat.setTexture("ColorMap", tex2);
         tex2.setWrap(WrapMode.Repeat);
-        
-        
+
+
         for (int j = 0; j < 2; j++) {
 
             for (int i = 0; i < 2 * fieldY + fieldY / 3 + 2; i++) {
-                
+
                 Geometry fenceGeom = createBox(1, 1, 1, "BlockG");
-                fenceGeom.setLocalTranslation(0, j * 2, 2 * i - 2);
+                fenceGeom.setLocalTranslation(fieldX + 1, j * 2, 2 * i - 2-fieldY + 1);
 
 
                 //Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
                 //mat.setColor("Color", ColorRGBA.Green);
-               // Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+                // Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
                 //mat2.setColor("Color", ColorRGBA.Yellow);
                 //if (i % 2 == 0) {
-                   // fenceGeom.setMaterial(mat2);
+                // fenceGeom.setMaterial(mat2);
                 //} else {
-                    fenceGeom.setMaterial(tex_mat);
-                    fenceGeom.getMesh().scaleTextureCoordinates(new Vector2f(1, 1));
-                    fenceGeom.setUserData("health", 3);
+                fenceGeom.setMaterial(tex_mat);
+                fenceGeom.getMesh().scaleTextureCoordinates(new Vector2f(1, 1));
+                fenceGeom.setUserData("health", 3);
                 //}
                 fenceLeft.attachChild(fenceGeom);
                 RigidBodyControl rb = new RigidBodyControl(0);
@@ -459,14 +458,16 @@ private AudioNode hitSound;
                 bulletAppState.getPhysicsSpace().add(fenceGeom);
                 //fence.setMaterial(mat);
             }
-            fenceRight = (Node) fenceLeft.clone();
+        }
+           // fenceLeft.setLocalTranslation(fieldX + 1, 0, -fieldY + 1);
 
-            fenceLeft.setLocalTranslation(fieldX + 1, 0, -fieldY + 1);
-            fenceRight.setLocalTranslation(-fieldX - 1, 0, -fieldY + 1);
+           
+            // fenceRight = (Node) fenceLeft.clone();
+            //  fenceRight.setLocalTranslation(-fieldX - 1, 0, -fieldY + 1);
             fence.attachChild(fenceLeft);
             fence.attachChild(fenceRight);
-        }
         
+
         return fence;
     }
 
@@ -484,13 +485,13 @@ private AudioNode hitSound;
         if (timeSpentP1 > shootFrequency) {
             shootPauseP1 = false;
         }
-        
-                long timeSpentP2 = System.currentTimeMillis() - timeP2;
+
+        long timeSpentP2 = System.currentTimeMillis() - timeP2;
         if (timeSpentP2 > shootFrequency) {
             shootPauseP2 = false;
         }
- 
-        
+
+
         Vector3f walkDirectionP1 = new Vector3f();
         walkDirectionP1.set(0, 0, 0);
         Vector3f walkDirectionP2 = new Vector3f();
@@ -509,17 +510,17 @@ private AudioNode hitSound;
             walkDirectionP2.addLocal(new Vector3f(10, 0, 0));
         }
         if (upP1) {
-            //walkDirectionP1.addLocal(new Vector3f (0,0,-10));
+            walkDirectionP1.addLocal(new Vector3f(0, 0, -10));
             // character1.warp();
         }
         if (upP2) {
-            //walkDirectionP2.addLocal(new Vector3f (0,0,-10));
+            walkDirectionP2.addLocal(new Vector3f(0, 0, -10));
         }
         if (downP1) {
-            //walkDirectionP1.addLocal(new Vector3f (0,0,10));
+            walkDirectionP1.addLocal(new Vector3f(0, 0, 10));
         }
         if (downP2) {
-            //walkDirectionP2.addLocal(new Vector3f (0,0,10));
+            walkDirectionP2.addLocal(new Vector3f(0, 0, 10));
         }
 
         character1.setWalkDirection(walkDirectionP1);
@@ -528,20 +529,20 @@ private AudioNode hitSound;
         walkDirectionP2.multLocal(1000 * moveSpeed).multLocal(tpf);
 
         /*
-        if(fenceNode != null && shot != null){
-        BoundingVolume bv = shot.getWorldBound();
-        CollisionResults results = new CollisionResults();
+         if(fenceNode != null && shot != null){
+         BoundingVolume bv = shot.getWorldBound();
+         CollisionResults results = new CollisionResults();
        
-                // 2. Aim the ray from cam loc to cam direction.
-            //    Ray ray = new Ray(cam.getLocation(), cam.getDirection());
-                // 3. Collect intersections between Ray and Shootables in results list.
-                fenceNode.collideWith(bv, results);
-                if (results.size() > 0) {
-                 //   Geometry hit = results.getClosestCollision().getGeometry();
-                 //   System.out.println(hit.getName() + "  " + hit.getUserData("health"));
-                 //   String healthStr = hit.getUserData("health");
-                }
-        }*/
+         // 2. Aim the ray from cam loc to cam direction.
+         //    Ray ray = new Ray(cam.getLocation(), cam.getDirection());
+         // 3. Collect intersections between Ray and Shootables in results list.
+         fenceNode.collideWith(bv, results);
+         if (results.size() > 0) {
+         //   Geometry hit = results.getClosestCollision().getGeometry();
+         //   System.out.println(hit.getName() + "  " + hit.getUserData("health"));
+         //   String healthStr = hit.getUserData("health");
+         }
+         }*/
     }
 
     @Override
@@ -550,14 +551,14 @@ private AudioNode hitSound;
     }
 
     public void makeShotP1(float shotAngle) {
-         shootSoundP1.playInstance(); //sound
+        shootSoundP1.playInstance(); //sound
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setColor("Color", ColorRGBA.White);
         Sphere sphere = new Sphere(10, 10, 0.5f, true, false);
         // sphere.setTextureMode(Sphere.TextureMode.Projected);
         Geometry ball_geo = new Geometry("cannon ball", sphere);
         ball_geo.setMaterial(mat);
-      
+
         //rootNode.attachChild();
 
         ball_geo.setLocalTranslation(player1.getWorldTranslation().addLocal(0, 1f, 0.5f));
@@ -572,14 +573,14 @@ private AudioNode hitSound;
     }
 
     public void makeShotP2(float shotAngle) {
-         shootSoundP2.playInstance(); //sound    
+        shootSoundP2.playInstance(); //sound    
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setColor("Color", ColorRGBA.White);
         Sphere sphere = new Sphere(10, 10, 0.5f, true, false);
         // sphere.setTextureMode(Sphere.TextureMode.Projected);
         Geometry ball_geo = new Geometry("cannon ball", sphere);
         ball_geo.setMaterial(mat);
-       shot.attachChild(ball_geo);
+        shot.attachChild(ball_geo);
 
         ball_geo.setLocalTranslation(player2.getWorldTranslation().addLocal(0, 1f, -0.5f));
 
