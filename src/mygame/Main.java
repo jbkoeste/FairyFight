@@ -34,6 +34,7 @@ public float fieldY = fieldX * fieldRatio;
 //private Node charNode1;
 private boolean leftP1 = false, rightP1 = false, upP1 = false, downP1 = false;
 private boolean leftP2 = false, rightP2 = false, upP2 = false, downP2 = false;
+private boolean angleLeftP1 = false, angleRightP1 = false, angleLeftP2 = false, angleRightP2 = false;
 private BulletAppState bulletAppState;
 private Node player1;
 BetterCharacterControl character1;
@@ -135,12 +136,57 @@ private int offsetP2 = 0;
                     downP1 = false;
                 }
             } 
+            
+            if(name.equals("AimLeftP1")){
+                if (keyPressed) {
+                    angleLeftP1 = true;
+                } else {
+                    angleLeftP1 = false;
+                }
+            }else if (name.equals("AimRightP1")){
+                 if (keyPressed) {
+                    angleRightP1 = true;
+                } else {
+                    angleRightP1 = false;
+                }
+            }
+            
+           if(name.equals("AimLeftP2")){
+                if (keyPressed) {
+                    angleLeftP2 = true;
+                } else {
+                    angleLeftP2 = false;
+                }
+            }else if (name.equals("AimRightP2")){
+                 if (keyPressed) {
+                    angleRightP2 = true;
+                } else {
+                    angleRightP2 = false;
+                }
+            }
+                
+                
              if (name.equals("ShootP1") && !keyPressed) {
-                 makeShotP1();
+                 float shotAngle = 0;
+                 if(angleLeftP1 == true){
+                     shotAngle = -0.5f;
+                 }else if(angleRightP1 == true){
+                     shotAngle = 0.5f; 
+                 }else{
+                     shotAngle = 0;
+                 }
+                 makeShotP1(shotAngle);
              }
              if (name.equals("ShootP2") && !keyPressed) {
-                 makeShotP2();
-                 
+                float shotAngle = 0;
+                 if(angleLeftP2 == true){
+                     shotAngle = -0.5f;
+                 }else if(angleRightP2 == true){
+                     shotAngle = 0.5f; 
+                 }else{
+                     shotAngle = 0;
+                 }
+                 makeShotP2(shotAngle);
              }
              if (name.equals("LeftP2")) {
                 if (keyPressed) {
@@ -181,24 +227,30 @@ private int offsetP2 = 0;
         inputManager.addMapping("UpP1", new KeyTrigger(KeyInput.KEY_W));
         inputManager.addMapping("DownP1", new KeyTrigger(KeyInput.KEY_S));
         inputManager.addMapping("ShootP1", new KeyTrigger(KeyInput.KEY_SPACE));
-        
+        inputManager.addMapping("AimLeftP1", new KeyTrigger(KeyInput.KEY_Q));
+        inputManager.addMapping("AimRightP1", new KeyTrigger(KeyInput.KEY_E));
         inputManager.addMapping("LeftP2", new KeyTrigger(KeyInput.KEY_NUMPAD4));
         inputManager.addMapping("RightP2", new KeyTrigger(KeyInput.KEY_NUMPAD6));
         inputManager.addMapping("UpP2", new KeyTrigger(KeyInput.KEY_NUMPAD8));
         inputManager.addMapping("DownP2", new KeyTrigger(KeyInput.KEY_NUMPAD5));
         inputManager.addMapping("ShootP2", new KeyTrigger(KeyInput.KEY_NUMPAD0));
-
+        inputManager.addMapping("AimLeftP2", new KeyTrigger(KeyInput.KEY_NUMPAD7));
+        inputManager.addMapping("AimRightP2", new KeyTrigger(KeyInput.KEY_NUMPAD9));
 
         inputManager.addListener(actionListener, "LeftP1");
         inputManager.addListener(actionListener, "RightP1");
         inputManager.addListener(actionListener, "UpP1");
         inputManager.addListener(actionListener, "DownP1");
         inputManager.addListener(actionListener, "ShootP1");
+        inputManager.addListener(actionListener, "AimLeftP1");
+        inputManager.addListener(actionListener, "AimRightP1");
         inputManager.addListener(actionListener, "LeftP2");
         inputManager.addListener(actionListener, "RightP2");
         inputManager.addListener(actionListener, "UpP2");
         inputManager.addListener(actionListener, "DownP2");
         inputManager.addListener(actionListener, "ShootP2");
+        inputManager.addListener(actionListener, "AimLeftP2");
+        inputManager.addListener(actionListener, "AimRightP2");
 
     }
     public Node createPlayer(BetterCharacterControl charC, String playerName, Vector3f location){
@@ -367,7 +419,7 @@ private int offsetP2 = 0;
         //TODO: add render code
     }
     
-    public void makeShotP1() {
+    public void makeShotP1(float shotAngle) {
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setColor("Color", ColorRGBA.White);
           Sphere sphere = new Sphere(10, 10, 0.5f, true, false);
@@ -382,7 +434,7 @@ private int offsetP2 = 0;
 
         ball_geo.addControl(ball_phy);
         bulletAppState.getPhysicsSpace().add(ball_phy);
-        Vector3f shootDirection = new Vector3f(0,0,1);
+        Vector3f shootDirection = new Vector3f(shotAngle,0,1);
         ball_phy.setLinearVelocity(shootDirection.mult(shootSpeed));
 
     }
