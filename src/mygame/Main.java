@@ -10,6 +10,9 @@ import com.jme3.bullet.control.BetterCharacterControl;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.collision.CollisionResults;
+import com.jme3.effect.ParticleEmitter;
+import com.jme3.effect.ParticleMesh;
+import com.jme3.effect.shapes.EmitterSphereShape;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
@@ -81,7 +84,9 @@ public class Main extends SimpleApplication {
     private Node field2Pl2;
     private Node field3Pl2;
     private int random1;
+    private int random3;
     private int random2;
+    ParticleEmitter fire;
     public static void main(String[] args) {
         Main app = new Main();
         app.start();
@@ -217,7 +222,7 @@ public class Main extends SimpleApplication {
 
         random1 = (int)(Math.random()*10)%3;
         random2 = (int)(Math.random()*10)%3;
-       
+        random3 = (int)(Math.random()*10)%3;
         // MainMenu m = new MainMenu(assetManager,rootNode,guiViewPort,inputManager);
         rootNode.attachChild(shot);
         bulletAppState = new BulletAppState();
@@ -303,7 +308,9 @@ public class Main extends SimpleApplication {
         rootNode.attachChild(shootSoundP1);
 
         gameSound.play();
-
+        if(random3 == 0){
+        emitterTest();
+        }
         setUpCamera();
         resetPlayer();
     }
@@ -552,7 +559,36 @@ public class Main extends SimpleApplication {
 
         return field;
     }
+public void emitterTest() {
+        fire = new ParticleEmitter("Emitter", ParticleMesh.Type.Triangle, 1000);
+        Material mat_red = new Material(assetManager, "Common/MatDefs/Misc/Particle.j3md");
+        fire.setShape(new EmitterSphereShape(Vector3f.ZERO, 25f));
+        mat_red.setTexture("Texture", assetManager.loadTexture("Textures/raindrop3.png"));
+        fire.setMaterial(mat_red);
+        fire.setImagesX(1);
+        fire.setImagesY(1); // 2x2 texture animation
+        fire.setEndColor(new ColorRGBA(1f, 1f, 1f, 1f));   // red
+        fire.setStartColor(new ColorRGBA(1f, 1f, 1f, 1f)); // yellow
+        fire.getParticleInfluencer().setInitialVelocity(new Vector3f(0, 0, 0));
+        fire.setStartSize(0.1f);
+        fire.setEndSize(0.1f);
+        fire.setGravity(0, 100f, 0);
+        fire.setLowLife(0.9f);
+        fire.setHighLife(2f);
+        fire.setFacingVelocity(false);
+        fire.setRotateSpeed(0.0f);
+//points.setFaceNormal(new Vector3f(0,0,1));
 
+        fire.setParticlesPerSec(800000);
+//fire.setShadowMode(ShadowMode.CastAndReceive);
+        //fire.getParticleInfluencer().setVelocityVariation(0.3f);
+        rootNode.attachChild(fire);
+
+        fire.updateLogicalState(0);
+
+        fire.updateGeometricState();
+
+    }
     public Node createField(float x, float z, float y) {
         Node field = new Node("field");
         Geometry fieldBottomPlayer1 = createBox(fieldX, 1, fieldY / 3, "Field_p1");
