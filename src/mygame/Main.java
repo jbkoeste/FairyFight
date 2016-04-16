@@ -22,6 +22,7 @@ import com.jme3.scene.shape.Sphere;
 import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
+import static java.lang.Thread.sleep;
 
 /**
  * test
@@ -482,3 +483,5 @@ private int offsetP2 = 0;
         nifty.update();
     }*/
 }
+
+
