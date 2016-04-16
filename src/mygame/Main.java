@@ -74,27 +74,151 @@ public class Main extends SimpleApplication {
     private AudioNode hitSound;
     private int playerLife = 3;
     private Node deathNode = new Node("death");
+    private Node field1Pl1;
+    private Node field2Pl1;
+    private Node field3Pl1;
+    private Node field1Pl2;
+    private Node field2Pl2;
+    private Node field3Pl2;
 
     public static void main(String[] args) {
         Main app = new Main();
         app.start();
     }
 
+    public void resetPlayer() {
+        character1.warp(new Vector3f(3, 2f, -2));
+        character2.warp(new Vector3f(-3, 2f, 18));
+    }
+
     
+    public void removeAll(Node removeNode){
+        System.out.println("remove");
+         removeNode.removeControl(RigidBodyControl.class);
+        bulletAppState.getPhysicsSpace().remove(removeNode);
+       
+        for( int i = 0;i<removeNode.getChildren().size();i++){
+            removeAll((Node)removeNode.getChild(i));
+        }
+        removeNode.removeFromParent();
+    }
     
-    public void resetPlayer(){
-     character1.warp(   new Vector3f(3, 2f, -2));
-     character2.warp(   new Vector3f(-3, 2f, 18));
+    public void removeRigid(Node removeNode){
+        // removeNode.removeControl(RigidBodyControl.class);
+         bulletAppState.getPhysicsSpace().remove(removeNode);
+    }
+    public void removeAll(Geometry removeNode){
+        System.out.println("removeg");
+        bulletAppState.getPhysicsSpace().remove(removeNode);
+        removeNode.removeControl(RigidBodyControl.class);
+        
+        removeNode.removeFromParent();
+    }
+    
+    public void buildBase(Node playerNode) {
+        if (getUserHealth(playerNode) == 3) {
+            if (playerNode.getName().equals("Node_Player1") == true) {
+                
+                if ((field2Pl2).getParent() != null ) {
+                    System.out.println("jj");
+                    removeAll(field2Pl2);
+                }
+                if( (field2Pl2).getParent() == null&&(field2Pl2.getControl(RigidBodyControl.class)!=null)){
+                    removeRigid(field2Pl2);
+                }
+                if ((field3Pl2).getParent() != null) {
+                    removeAll(field3Pl2);
+                }
+                if( (field3Pl2).getParent() == null&&(field3Pl2.getControl(RigidBodyControl.class)!=null)){
+                    removeRigid(field3Pl2);
+                }
+            } else {
+
+                if ((field2Pl1).getParent() != null) {
+                    removeAll(field2Pl1);
+                }
+                if( (field2Pl1).getParent() == null&&(field2Pl1.getControl(RigidBodyControl.class)!=null)){
+                    removeRigid(field2Pl1);
+                }
+                if ((field3Pl1).getParent() != null) {
+                    removeAll(field3Pl1);
+                }
+                if( (field3Pl1).getParent() == null&&(field3Pl1.getControl(RigidBodyControl.class)!=null)){
+                    removeRigid(field3Pl1);
+                }
+            }
+        } else if (getUserHealth(playerNode) == 2) {
+            if (playerNode.getName().equals("Node_Player1") == true) {
+
+                if ((field2Pl2).getParent() == null) {
+                    RigidBodyControl rb = new RigidBodyControl(0);
+                    field2Pl2.addControl(rb);
+                    bulletAppState.getPhysicsSpace().add(field2Pl2);
+                    rootNode.attachChild(field2Pl2);
+                }
+                if ((field3Pl2).getParent() != null) {
+                    removeAll(field3Pl2);
+                }
+                if( (field3Pl2).getParent() == null&&(field3Pl2.getControl(RigidBodyControl.class)!=null)){
+                    removeRigid(field3Pl2);
+                }
+            } else {
+
+                if ((field2Pl1).getParent() == null) {
+                     RigidBodyControl rb = new RigidBodyControl(0);
+                    field2Pl1.addControl(rb);
+                    bulletAppState.getPhysicsSpace().add(field2Pl1);
+                    rootNode.attachChild(field2Pl1);
+                }
+                if ((field3Pl1).getParent() != null) {
+                    removeAll(field3Pl1);
+                }
+                if( (field3Pl1).getParent() == null&&(field3Pl1.getControl(RigidBodyControl.class)!=null)){
+                    removeRigid(field3Pl1);
+                }
+            }
+        } else {
+            if (playerNode.getName().equals("Node_Player1") == true) {
+
+                if ((field2Pl2).getParent() == null) {
+                    RigidBodyControl rb = new RigidBodyControl(0);
+                    field2Pl2.addControl(rb);
+                    bulletAppState.getPhysicsSpace().add(field2Pl2);
+                    rootNode.attachChild(field2Pl2);
+                }
+                if ((field3Pl2).getParent() == null) {
+                      RigidBodyControl rb = new RigidBodyControl(0);
+                    field3Pl2.addControl(rb);
+                    bulletAppState.getPhysicsSpace().add(field3Pl2);
+                    rootNode.attachChild(field3Pl2);
+                }
+            } else {
+
+                if ((field2Pl1).getParent() == null) {
+                      RigidBodyControl rb = new RigidBodyControl(0);
+                    field2Pl1.addControl(rb);
+                    bulletAppState.getPhysicsSpace().add(field2Pl1);
+                    rootNode.attachChild(field2Pl1);
+                }
+                if ((field3Pl1).getParent() == null) {
+                      RigidBodyControl rb = new RigidBodyControl(0);
+                    field3Pl1.addControl(rb);
+                    bulletAppState.getPhysicsSpace().add(field3Pl1);
+                    rootNode.attachChild(field3Pl1);
+                }
+            }
+        }
+
     }
     @Override
     public void simpleInitApp() {
-
+      
 
         // MainMenu m = new MainMenu(assetManager,rootNode,guiViewPort,inputManager);
         rootNode.attachChild(shot);
         bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
-       
+
         setUpKeys();
 
         Node fieldNode = new Node("fieldNode");
@@ -105,11 +229,14 @@ public class Main extends SimpleApplication {
 
 
         fenceNode.attachChild(createFence());
+        field1Pl1 = createField(0, 0, 20);
+        field2Pl1 = createField(0, 0, 16);
+        field3Pl1 = createField(0, 0, 12);
+        field1Pl2 = createField(0, 0, -4);
+        field2Pl2 = createField(0, 0, 0);
+        field3Pl2 = createField(0, 0, 4);
 
-        Node field = createField();
-        RigidBodyControl rb = new RigidBodyControl(0);
-        field.addControl(rb);
-        bulletAppState.getPhysicsSpace().add(field);
+
         //fieldNode.attachChild(field);
         //createPlayer1();
 
@@ -117,30 +244,35 @@ public class Main extends SimpleApplication {
         //create Player 1
 
         character1 = new BetterCharacterControl(1f, 2, 100);
-        character1.setGravity(new Vector3f(0,10000,0));
+        character1.setGravity(new Vector3f(0, 10000, 0));
         player1 = (createPlayer(character1, "Player1", new Vector3f(0, 3f, 0)));
-
+        
         //create Player 2
 
         character2 = new BetterCharacterControl(1f, 2, 100);
         player2 = (createPlayer(character2, "Player2", new Vector3f(0, 3f, 12)));
-        pYListener pY = new pYListener(bulletAppState, rootNode,character1,character2);
+        pYListener pY = new pYListener(bulletAppState, rootNode, character1, character2,field1Pl1,field2Pl1,field3Pl1,field1Pl2,field2Pl2,field3Pl2,assetManager);
 
         shot.addControl(pY);
 
         //player2.setLocalTranslation(0, 10, 10);
         //character2.setApplyPhysicsLocal(true);
         //character1.setApplyPhysicsLocal(true);
-       // exitNode.attachChild(createExit());
+        // exitNode.attachChild(createExit());
 
         rootNode.attachChild(exitNode);
         rootNode.attachChild(fenceNode);
-        rootNode.attachChild(field);
+        rootNode.attachChild(field1Pl1);
+
+        rootNode.attachChild(field1Pl2);
+
+       
         rootNode.attachChild(player1);
         rootNode.attachChild(player2);
         deathNode = createDeath();
         rootNode.attachChild(deathNode);
-
+buildBase(player1);
+buildBase(player2);
         // sounds  Menu Sound could also be game sound
         shootSoundP1 = new AudioNode(assetManager, "Sounds/shootplayer1.wav", false);
         rootNode.attachChild(shootSoundP1);
@@ -367,24 +499,24 @@ public class Main extends SimpleApplication {
 
     }
 
-    public Node createDeath(){
+    public Node createDeath() {
         Node field = new Node("death");
-            Geometry fieldBottomPlayer1 = createBox(fieldX*4, 0.5f, fieldY*4, "field_death");
-            Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-            mat.setColor("Color", ColorRGBA.Yellow);
-            fieldBottomPlayer1.setMaterial(mat);
-            RigidBodyControl rb = new RigidBodyControl(0);
-            fieldBottomPlayer1.addControl(rb);
-            bulletAppState.getPhysicsSpace().add(fieldBottomPlayer1);
-            fieldBottomPlayer1.setLocalTranslation(0, -5, 0);
-            
-            field.attachChild(fieldBottomPlayer1);
+        Geometry fieldBottomPlayer1 = createBox(fieldX * 5, 0.5f, fieldY * 5, "field_death");
+        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setColor("Color", ColorRGBA.Black);
+        fieldBottomPlayer1.setMaterial(mat);
+        RigidBodyControl rb = new RigidBodyControl(0);
+        fieldBottomPlayer1.addControl(rb);
+        bulletAppState.getPhysicsSpace().add(fieldBottomPlayer1);
+        fieldBottomPlayer1.setLocalTranslation(0, -5, 0);
+
+        field.attachChild(fieldBottomPlayer1);
         return field;
     }
-    
-    public Node createField() {
+
+    public Node createField(float x, float z, float y) {
         Node field = new Node("field");
-        Geometry fieldBottomPlayer1 = createBox(fieldX, 1, fieldY, "Field_p1");
+        Geometry fieldBottomPlayer1 = createBox(fieldX, 1, fieldY / 3, "Field_p1");
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 
         Material tex_mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -393,22 +525,25 @@ public class Main extends SimpleApplication {
         Texture tex2 = assetManager.loadTexture(key);
         tex_mat.setTexture("ColorMap", tex2);
         tex2.setWrap(WrapMode.Repeat);
-        fieldBottomPlayer1.getMesh().scaleTextureCoordinates(new Vector2f(4, 4));
+        fieldBottomPlayer1.getMesh().scaleTextureCoordinates(new Vector2f(1, 2));
         //tex_ma
         //TODO TEXTURE
         //tex2.setWrap(Texture.WrapAxis., Texture.WrapMode.Repeat);
         mat.setColor("Color", ColorRGBA.Blue);
         fieldBottomPlayer1.setMaterial(tex_mat);
-
+        fieldBottomPlayer1.setLocalTranslation(x, z, y);
         field.attachChild(fieldBottomPlayer1);
+        RigidBodyControl rb = new RigidBodyControl(0);
+        field.addControl(rb);
+        bulletAppState.getPhysicsSpace().add(field);
+        /*Geometry fieldBottomPlayer2 = fieldBottomPlayer1.clone();
 
-        Geometry fieldBottomPlayer2 = fieldBottomPlayer1.clone();
-
-        fieldBottomPlayer2.setLocalTranslation(0, 0, fieldY * 2 + fieldY / 1.5f);
-        Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        mat2.setColor("Color", ColorRGBA.Red);
-        fieldBottomPlayer2.setMaterial(mat2);
-        field.attachChild(fieldBottomPlayer2);
+         fieldBottomPlayer2.setLocalTranslation(x,z,y);
+         Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+         mat2.setColor("Color", ColorRGBA.Red);
+         fieldBottomPlayer2.setMaterial(mat2);
+         field.attachChild(fieldBottomPlayer2);
+         * */
 
         return field;
     }
@@ -464,7 +599,7 @@ public class Main extends SimpleApplication {
             for (int i = 0; i < 2 * fieldY + fieldY / 3 + 2; i++) {
 
                 Geometry fenceGeom = createBox(1, 1, 1, "BlockG");
-                fenceGeom.setLocalTranslation(fieldX + 1, j * 2, 2 * i - 2-fieldY + 1);
+                fenceGeom.setLocalTranslation(fieldX + 1, j * 2, 2 * i - 2 - fieldY + 1);
 
 
                 //Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -485,13 +620,13 @@ public class Main extends SimpleApplication {
                 //fence.setMaterial(mat);
             }
         }
-        
-         for (int j = 0; j < 2; j++) {
+
+        for (int j = 0; j < 2; j++) {
 
             for (int i = 0; i < 2 * fieldY + fieldY / 3 + 2; i++) {
 
                 Geometry fenceGeom = createBox(1, 1, 1, "BlockG");
-                fenceGeom.setLocalTranslation(-fieldX - 1, j * 2, 2 * i + -2-fieldY + 1);
+                fenceGeom.setLocalTranslation(-fieldX - 1, j * 2, 2 * i + -2 - fieldY + 1);
 
 
                 //Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -512,14 +647,14 @@ public class Main extends SimpleApplication {
                 //fence.setMaterial(mat);
             }
         }
-           // fenceLeft.setLocalTranslation(fieldX + 1, 0, -fieldY + 1);
+        // fenceLeft.setLocalTranslation(fieldX + 1, 0, -fieldY + 1);
 
-           
-            // fenceRight = (Node) fenceLeft.clone();
-            //  fenceRight.setLocalTranslation(-fieldX - 1, 0, -fieldY + 1);
-            fence.attachChild(fenceLeft);
-            fence.attachChild(fenceRight);
-        
+
+        // fenceRight = (Node) fenceLeft.clone();
+        //  fenceRight.setLocalTranslation(-fieldX - 1, 0, -fieldY + 1);
+        fence.attachChild(fenceLeft);
+        fence.attachChild(fenceRight);
+
 
         return fence;
     }
@@ -581,26 +716,34 @@ public class Main extends SimpleApplication {
         character2.setWalkDirection(walkDirectionP2);
         walkDirectionP2.multLocal(1000 * moveSpeed).multLocal(tpf);
 
-        
 
-         BoundingVolume bvP1 = player1.getWorldBound();
-         CollisionResults results = new CollisionResults();
-         deathNode.collideWith(bvP1, results);
-         if (results.size() > 0) {
-         //   Geometry hit = results.getClosestCollision().getGeometry();
-          //  System.out.println(hit.getName() + "  " + hit.getUserData("health"));
-         //   String healthStr = hit.getUserData("health");
-             decHealth(player1);
-             System.out.println(getUserHealth(player1));
-             resetPlayer();
-         }
-         BoundingVolume bvP2 = player1.getWorldBound();
-         results = new CollisionResults();
-         deathNode.collideWith(bvP2, results);
-         if (results.size() > 0) {        
-             decHealth(player2);
-             resetPlayer();
-         }
+
+        BoundingVolume bvP1 = player1.getWorldBound();
+        CollisionResults results = new CollisionResults();
+        deathNode.collideWith(bvP1, results);
+        if (results.size() > 0) {
+            //   Geometry hit = results.getClosestCollision().getGeometry();
+            //  System.out.println(hit.getName() + "  " + hit.getUserData("health"));
+            //   String healthStr = hit.getUserData("health");
+            decHealth(player1);
+           // System.out.println(getUserHealth(player1));
+            buildBase(player1);
+            buildBase(player2);
+            collision.playInstance();
+            resetPlayer();
+
+        }
+        BoundingVolume bvP2 = player2.getWorldBound();
+        results = new CollisionResults();
+        deathNode.collideWith(bvP2, results);
+        if (results.size() > 0) {
+            decHealth(player2);
+            resetPlayer();
+            buildBase(player1);
+            buildBase(player2);
+            collision.playInstance();
+            resetPlayer();
+        }
         // }
     }
 
@@ -669,6 +812,7 @@ public class Main extends SimpleApplication {
         if (getUserHealth(playerNode) <= 0) {
             bulletAppState.getPhysicsSpace().remove(playerNode.getControl(RigidBodyControl.class));
             playerNode.removeFromParent();
+            //TODO GAMEEND
         }
     }
     /*  public void setLifePanelText() {
