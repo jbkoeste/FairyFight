@@ -343,6 +343,8 @@ private AudioNode hitSound;
         charNode1.attachChild(model2);
         charNode1.addControl(charC);
         charNode1.setUserData("health", 3);
+        RigidBodyControl rb = new RigidBodyControl(1);
+        charNode1.addControl(rb);
         bulletAppState.getPhysicsSpace().add(charNode1);
 
         return (charNode1);
@@ -449,7 +451,7 @@ private AudioNode hitSound;
                 //} else {
                     fenceGeom.setMaterial(tex_mat);
                     fenceGeom.getMesh().scaleTextureCoordinates(new Vector2f(1, 1));
-                    fenceGeom.setUserData("health", 2);
+                    fenceGeom.setUserData("health", 3);
                 //}
                 fenceLeft.attachChild(fenceGeom);
                 RigidBodyControl rb = new RigidBodyControl(0);
