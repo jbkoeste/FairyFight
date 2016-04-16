@@ -80,7 +80,8 @@ public class Main extends SimpleApplication {
     private Node field1Pl2;
     private Node field2Pl2;
     private Node field3Pl2;
-
+    private int random1;
+    private int random2;
     public static void main(String[] args) {
         Main app = new Main();
         app.start();
@@ -214,7 +215,9 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleInitApp() {
 
-
+        random1 = (int)(Math.random()*10)%3;
+        random2 = (int)(Math.random()*10)%3;
+       
         // MainMenu m = new MainMenu(assetManager,rootNode,guiViewPort,inputManager);
         rootNode.attachChild(shot);
         bulletAppState = new BulletAppState();
@@ -556,7 +559,19 @@ public class Main extends SimpleApplication {
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 
         Material tex_mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        TextureKey key = new TextureKey("Textures/gras.png");
+        String str = "";
+        switch(random1){
+            case 0:
+                str = "gras";
+                break;
+            case 1:
+                str = "schild";
+                break;
+            case 2:
+                str = "ziegel";
+                break;
+        }
+        TextureKey key = new TextureKey("Textures/"+str+".png");
         key.setGenerateMips(true);
         Texture tex2 = assetManager.loadTexture(key);
         tex_mat.setTexture("ColorMap", tex2);
@@ -623,7 +638,19 @@ public class Main extends SimpleApplication {
         Node fenceRight = new Node("fenceRight");
 
         Material tex_mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        TextureKey key = new TextureKey("Textures/ziegel.png");
+        String str = "";
+        switch(random1){
+            case 0:
+                str = "ziegel";
+                break;
+            case 1:
+                str = "schild";
+                break;
+            case 2:
+                str = "gras";
+                break;
+        }
+        TextureKey key = new TextureKey("Textures/"+str+".png");
         key.setGenerateMips(true);
         Texture tex2 = assetManager.loadTexture(key);
         tex_mat.setTexture("ColorMap", tex2);
