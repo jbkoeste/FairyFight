@@ -439,7 +439,7 @@ private int offsetP2 = 0;
 
     }
     
-        public void makeShotP2() {
+        public void makeShotP2(float shotAngle) {
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setColor("Color", ColorRGBA.White);
           Sphere sphere = new Sphere(10, 10, 0.5f, true, false);
@@ -454,7 +454,7 @@ private int offsetP2 = 0;
 
         ball_geo.addControl(ball_phy);
         bulletAppState.getPhysicsSpace().add(ball_phy);
-        Vector3f shootDirection = new Vector3f(0,0,-1);
+        Vector3f shootDirection = new Vector3f(shotAngle,0,-1);
         ball_phy.setLinearVelocity(shootDirection.mult(shootSpeed));
 
     }
