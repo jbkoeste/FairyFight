@@ -77,12 +77,12 @@ private int offsetP2 = 0;
         
         //create Player 1
       
-        character1 = new BetterCharacterControl(0.5f,1,1);
+        character1 = new BetterCharacterControl(1f,2,2);
         player1 = (createPlayer(character1,"Player1",new Vector3f(0, 3f, 0)));
         
         //create Player 2
        
-        character2 = new BetterCharacterControl(0.5f,1,1);
+        character2 = new BetterCharacterControl(1f,2,2);
         player2 = (createPlayer(character2,"Player2",new Vector3f(0, 3f, 12)));
         
         
@@ -136,12 +136,11 @@ private int offsetP2 = 0;
                 }
             } 
              if (name.equals("ShootP1") && !keyPressed) {
-                 System.out.println(cam.getLocation());
+                 makeShotP1();
              }
              if (name.equals("ShootP2") && !keyPressed) {
-                 incHealth(player1);
-                 System.out.println(getUserHealth(player1));
-                 makeShot();
+                 makeShotP2();
+                 
              }
              if (name.equals("LeftP2")) {
                 if (keyPressed) {
@@ -213,6 +212,7 @@ private int offsetP2 = 0;
         Geometry model2 = createBox(1, 1, 1, playerName);
 
         model2.setMaterial(mat);
+        model2.setLocalTranslation(0,1,0);
         charNode1.setLocalTranslation(location);
         
         charNode1.attachChild(model2);
@@ -258,7 +258,7 @@ private int offsetP2 = 0;
         
         Geometry fenceGeom = createBox(1,1,2*fieldY+fieldY/3+4,"Block");
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-                mat.setColor("Color", ColorRGBA.Orange);
+        mat.setColor("Color", ColorRGBA.Orange);
         fenceGeom.setMaterial(mat);
         fenceGeom.setLocalTranslation(fieldX+3f, 2, 8);
         exitLeft.attachChild(fenceGeom);
@@ -367,25 +367,43 @@ private int offsetP2 = 0;
         //TODO: add render code
     }
     
-    public void makeShot() {
+    public void makeShotP1() {
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setColor("Color", ColorRGBA.White);
-          Sphere sphere = new Sphere(10, 10, 0.4f, true, false);
+          Sphere sphere = new Sphere(10, 10, 0.5f, true, false);
        // sphere.setTextureMode(Sphere.TextureMode.Projected);
         Geometry ball_geo = new Geometry("cannon ball", sphere);
         ball_geo.setMaterial(mat);
         rootNode.attachChild(ball_geo);
 
-        ball_geo.setLocalTranslation(player1.getWorldTranslation());
+        ball_geo.setLocalTranslation(player1.getWorldTranslation().addLocal(0, 1f, 0.5f));
 
-       RigidBodyControl ball_phy = new RigidBodyControl(1f);
+       RigidBodyControl ball_phy = new RigidBodyControl(0.1f);
 
         ball_geo.addControl(ball_phy);
         bulletAppState.getPhysicsSpace().add(ball_phy);
-      
-        ball_phy.setLinearVelocity(character1.getViewDirection().mult(25));
-       
+        Vector3f shootDirection = new Vector3f(0,0,1);
+        ball_phy.setLinearVelocity(shootDirection.mult(shootSpeed));
 
+    }
+    
+        public void makeShotP2() {
+        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setColor("Color", ColorRGBA.White);
+          Sphere sphere = new Sphere(10, 10, 0.5f, true, false);
+       // sphere.setTextureMode(Sphere.TextureMode.Projected);
+        Geometry ball_geo = new Geometry("cannon ball", sphere);
+        ball_geo.setMaterial(mat);
+        rootNode.attachChild(ball_geo);
+
+        ball_geo.setLocalTranslation(player2.getWorldTranslation().addLocal(0, 1f, -0.5f));
+
+       RigidBodyControl ball_phy = new RigidBodyControl(0.1f);
+
+        ball_geo.addControl(ball_phy);
+        bulletAppState.getPhysicsSpace().add(ball_phy);
+        Vector3f shootDirection = new Vector3f(0,0,-1);
+        ball_phy.setLinearVelocity(shootDirection.mult(shootSpeed));
 
     }
     
