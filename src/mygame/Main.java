@@ -72,12 +72,20 @@ public class Main extends SimpleApplication {
     private AudioNode menuSound;
     private AudioNode gameSound;
     private AudioNode hitSound;
+    private int playerLife = 3;
+    private Node deathNode = new Node("death");
 
     public static void main(String[] args) {
         Main app = new Main();
         app.start();
     }
 
+    
+    
+    public void resetPlayer(){
+     character1.warp(   new Vector3f(3, 2f, -2));
+     character2.warp(   new Vector3f(-3, 2f, 18));
+    }
     @Override
     public void simpleInitApp() {
 
@@ -86,9 +94,7 @@ public class Main extends SimpleApplication {
         rootNode.attachChild(shot);
         bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
-        pYListener pY = new pYListener(bulletAppState, rootNode);
-
-        shot.addControl(pY);
+       
         setUpKeys();
 
         Node fieldNode = new Node("fieldNode");
@@ -110,26 +116,30 @@ public class Main extends SimpleApplication {
 
         //create Player 1
 
-        character1 = new BetterCharacterControl(1f, 2, 2);
+        character1 = new BetterCharacterControl(1f, 2, 100);
+        character1.setGravity(new Vector3f(0,10000,0));
         player1 = (createPlayer(character1, "Player1", new Vector3f(0, 3f, 0)));
 
         //create Player 2
 
-        character2 = new BetterCharacterControl(1f, 2, 2);
+        character2 = new BetterCharacterControl(1f, 2, 100);
         player2 = (createPlayer(character2, "Player2", new Vector3f(0, 3f, 12)));
+        pYListener pY = new pYListener(bulletAppState, rootNode,character1,character2);
 
+        shot.addControl(pY);
 
         //player2.setLocalTranslation(0, 10, 10);
         //character2.setApplyPhysicsLocal(true);
         //character1.setApplyPhysicsLocal(true);
-        exitNode.attachChild(createExit());
+       // exitNode.attachChild(createExit());
 
         rootNode.attachChild(exitNode);
         rootNode.attachChild(fenceNode);
         rootNode.attachChild(field);
         rootNode.attachChild(player1);
         rootNode.attachChild(player2);
-
+        deathNode = createDeath();
+        rootNode.attachChild(deathNode);
 
         // sounds  Menu Sound could also be game sound
         shootSoundP1 = new AudioNode(assetManager, "Sounds/shootplayer1.wav", false);
@@ -158,6 +168,7 @@ public class Main extends SimpleApplication {
         gameSound.play();
 
         setUpCamera();
+        resetPlayer();
     }
 
     public void setOffset(int direction, int life) {
@@ -341,7 +352,7 @@ public class Main extends SimpleApplication {
 
         charNode1.attachChild(model2);
         charNode1.addControl(charC);
-        charNode1.setUserData("health", 3);
+        charNode1.setUserData("health", playerLife);
         RigidBodyControl rb = new RigidBodyControl(1);
         charNode1.addControl(rb);
         bulletAppState.getPhysicsSpace().add(charNode1);
@@ -356,6 +367,21 @@ public class Main extends SimpleApplication {
 
     }
 
+    public Node createDeath(){
+        Node field = new Node("death");
+            Geometry fieldBottomPlayer1 = createBox(fieldX*4, 0.5f, fieldY*4, "field_death");
+            Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+            mat.setColor("Color", ColorRGBA.Yellow);
+            fieldBottomPlayer1.setMaterial(mat);
+            RigidBodyControl rb = new RigidBodyControl(0);
+            fieldBottomPlayer1.addControl(rb);
+            bulletAppState.getPhysicsSpace().add(fieldBottomPlayer1);
+            fieldBottomPlayer1.setLocalTranslation(0, -5, 0);
+            
+            field.attachChild(fieldBottomPlayer1);
+        return field;
+    }
+    
     public Node createField() {
         Node field = new Node("field");
         Geometry fieldBottomPlayer1 = createBox(fieldX, 1, fieldY, "Field_p1");
@@ -459,6 +485,33 @@ public class Main extends SimpleApplication {
                 //fence.setMaterial(mat);
             }
         }
+        
+         for (int j = 0; j < 2; j++) {
+
+            for (int i = 0; i < 2 * fieldY + fieldY / 3 + 2; i++) {
+
+                Geometry fenceGeom = createBox(1, 1, 1, "BlockG");
+                fenceGeom.setLocalTranslation(-fieldX - 1, j * 2, 2 * i + -2-fieldY + 1);
+
+
+                //Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+                //mat.setColor("Color", ColorRGBA.Green);
+                // Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+                //mat2.setColor("Color", ColorRGBA.Yellow);
+                //if (i % 2 == 0) {
+                // fenceGeom.setMaterial(mat2);
+                //} else {
+                fenceGeom.setMaterial(tex_mat);
+                fenceGeom.getMesh().scaleTextureCoordinates(new Vector2f(1, 1));
+                fenceGeom.setUserData("health", 3);
+                //}
+                fenceRight.attachChild(fenceGeom);
+                RigidBodyControl rb = new RigidBodyControl(0);
+                fenceGeom.addControl(rb);
+                bulletAppState.getPhysicsSpace().add(fenceGeom);
+                //fence.setMaterial(mat);
+            }
+        }
            // fenceLeft.setLocalTranslation(fieldX + 1, 0, -fieldY + 1);
 
            
@@ -528,21 +581,27 @@ public class Main extends SimpleApplication {
         character2.setWalkDirection(walkDirectionP2);
         walkDirectionP2.multLocal(1000 * moveSpeed).multLocal(tpf);
 
-        /*
-         if(fenceNode != null && shot != null){
-         BoundingVolume bv = shot.getWorldBound();
+        
+
+         BoundingVolume bvP1 = player1.getWorldBound();
          CollisionResults results = new CollisionResults();
-       
-         // 2. Aim the ray from cam loc to cam direction.
-         //    Ray ray = new Ray(cam.getLocation(), cam.getDirection());
-         // 3. Collect intersections between Ray and Shootables in results list.
-         fenceNode.collideWith(bv, results);
+         deathNode.collideWith(bvP1, results);
          if (results.size() > 0) {
          //   Geometry hit = results.getClosestCollision().getGeometry();
-         //   System.out.println(hit.getName() + "  " + hit.getUserData("health"));
+          //  System.out.println(hit.getName() + "  " + hit.getUserData("health"));
          //   String healthStr = hit.getUserData("health");
+             decHealth(player1);
+             System.out.println(getUserHealth(player1));
+             resetPlayer();
          }
-         }*/
+         BoundingVolume bvP2 = player1.getWorldBound();
+         results = new CollisionResults();
+         deathNode.collideWith(bvP2, results);
+         if (results.size() > 0) {        
+             decHealth(player2);
+             resetPlayer();
+         }
+        // }
     }
 
     @Override
@@ -561,7 +620,7 @@ public class Main extends SimpleApplication {
 
         //rootNode.attachChild();
 
-        ball_geo.setLocalTranslation(player1.getWorldTranslation().addLocal(0, 1f, 0.5f));
+        ball_geo.setLocalTranslation(player1.getWorldTranslation().addLocal(0, 1f, 2.5f));
 
         RigidBodyControl ball_phy = new RigidBodyControl(0.1f);
 
@@ -582,7 +641,7 @@ public class Main extends SimpleApplication {
         ball_geo.setMaterial(mat);
         shot.attachChild(ball_geo);
 
-        ball_geo.setLocalTranslation(player2.getWorldTranslation().addLocal(0, 1f, -0.5f));
+        ball_geo.setLocalTranslation(player2.getWorldTranslation().addLocal(0, 1f, -2.5f));
 
         RigidBodyControl ball_phy = new RigidBodyControl(0.1f);
 
@@ -607,6 +666,10 @@ public class Main extends SimpleApplication {
 
     public void decHealth(Node playerNode) {
         setUserHealth(playerNode, getUserHealth(playerNode) - 1);
+        if (getUserHealth(playerNode) <= 0) {
+            bulletAppState.getPhysicsSpace().remove(playerNode.getControl(RigidBodyControl.class));
+            playerNode.removeFromParent();
+        }
     }
     /*  public void setLifePanelText() {
      Screen screen = nifty.getCurrentScreen();
