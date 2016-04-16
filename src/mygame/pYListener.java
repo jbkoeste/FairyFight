@@ -38,7 +38,7 @@ public class pYListener extends RigidBodyControl
             shootPause = false;
         }
         
-         long timeSpentPlayer = System.currentTimeMillis() - time;
+         long timeSpentPlayer = System.currentTimeMillis() - timePlayer;
         if (timeSpentPlayer > shootFrequency) {
             shootPausePlayer = false;
         }
