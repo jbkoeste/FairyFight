@@ -2,11 +2,14 @@ package mygame;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.TextureKey;
+import com.jme3.audio.AudioNode;
+import com.jme3.bounding.BoundingVolume;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.control.BetterCharacterControl;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.collision.CollisionResults;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
@@ -14,6 +17,7 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
@@ -58,6 +62,17 @@ public class Main extends SimpleApplication {
     private long timeP2 = 0;
     private int offsetP2 = 0;
     private int shootFrequency = 500;
+    private Node shot = new Node("Shot");
+    private Node fenceNode = new Node("fenceNode");
+    
+    //sound
+private AudioNode shootSoundP1;
+private AudioNode shootSoundP2;
+private AudioNode collision;
+private AudioNode powerUp;
+private AudioNode menuSound;
+private AudioNode gameSound;
+private AudioNode hitSound;
 
     public static void main(String[] args) {
         Main app = new Main();
@@ -67,15 +82,18 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleInitApp() {
 
-
+   
         // MainMenu m = new MainMenu(assetManager,rootNode,guiViewPort,inputManager);
-
+        rootNode.attachChild(shot);
         bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
+        pYListener pY = new pYListener(bulletAppState,rootNode);
+        
+            shot.addControl(pY);
         setUpKeys();
 
         Node fieldNode = new Node("fieldNode");
-        Node fenceNode = new Node("fenceNode");
+       
         Node exitNode = new Node("exit");
 
         flyCam.setMoveSpeed(30);
@@ -112,6 +130,34 @@ public class Main extends SimpleApplication {
         rootNode.attachChild(field);
         rootNode.attachChild(player1);
         rootNode.attachChild(player2);
+        
+        
+        // sounds  Menu Sound could also be game sound
+        shootSoundP1 = new AudioNode(assetManager, "Sounds/shootplayer1.wav", false);
+        rootNode.attachChild(shootSoundP1);
+        
+        shootSoundP2 = new AudioNode(assetManager, "Sounds/shootplayer2.wav", false);
+        rootNode.attachChild(shootSoundP2);
+        
+        menuSound = new AudioNode(assetManager, "Sounds/MenuSound.wav", false);
+        menuSound.setLooping(true);
+        rootNode.attachChild(menuSound);
+
+        hitSound = new AudioNode(assetManager, "Sounds/Hit_Hurt78.wav", false);
+        rootNode.attachChild(hitSound);
+
+        collision = new AudioNode(assetManager, "Sounds/collision.wav", false);
+        rootNode.attachChild(collision);
+
+        gameSound = new AudioNode(assetManager, "Sounds/gameSoundBackground.wav", false);
+        gameSound.setLooping(true);
+        rootNode.attachChild(gameSound);
+
+        powerUp = new AudioNode(assetManager, "Sounds/powerup.wav", false);
+        rootNode.attachChild(shootSoundP1);
+        
+        gameSound.play();
+        
         setUpCamera();
     }
 
@@ -341,7 +387,7 @@ public class Main extends SimpleApplication {
     }
 
     public Node createExit() {
-        Node exit = new Node();
+        Node exit = new Node("Block");
         Node exitLeft = new Node();
         Node exitRight = new Node();
         Node exitFront = new Node();
@@ -389,7 +435,8 @@ public class Main extends SimpleApplication {
         for (int j = 0; j < 2; j++) {
 
             for (int i = 0; i < 2 * fieldY + fieldY / 3 + 2; i++) {
-                Geometry fenceGeom = createBox(1, 1, 1, "Block");
+                
+                Geometry fenceGeom = createBox(1, 1, 1, "BlockG");
                 fenceGeom.setLocalTranslation(0, j * 2, 2 * i - 2);
 
 
@@ -402,8 +449,12 @@ public class Main extends SimpleApplication {
                 //} else {
                     fenceGeom.setMaterial(tex_mat);
                     fenceGeom.getMesh().scaleTextureCoordinates(new Vector2f(1, 1));
+                    fenceGeom.setUserData("health", 2);
                 //}
                 fenceLeft.attachChild(fenceGeom);
+                RigidBodyControl rb = new RigidBodyControl(0);
+                fenceGeom.addControl(rb);
+                bulletAppState.getPhysicsSpace().add(fenceGeom);
                 //fence.setMaterial(mat);
             }
             fenceRight = (Node) fenceLeft.clone();
@@ -413,6 +464,7 @@ public class Main extends SimpleApplication {
             fence.attachChild(fenceLeft);
             fence.attachChild(fenceRight);
         }
+        
         return fence;
     }
 
@@ -473,6 +525,21 @@ public class Main extends SimpleApplication {
         character2.setWalkDirection(walkDirectionP2);
         walkDirectionP2.multLocal(1000 * moveSpeed).multLocal(tpf);
 
+        /*
+        if(fenceNode != null && shot != null){
+        BoundingVolume bv = shot.getWorldBound();
+        CollisionResults results = new CollisionResults();
+       
+                // 2. Aim the ray from cam loc to cam direction.
+            //    Ray ray = new Ray(cam.getLocation(), cam.getDirection());
+                // 3. Collect intersections between Ray and Shootables in results list.
+                fenceNode.collideWith(bv, results);
+                if (results.size() > 0) {
+                 //   Geometry hit = results.getClosestCollision().getGeometry();
+                 //   System.out.println(hit.getName() + "  " + hit.getUserData("health"));
+                 //   String healthStr = hit.getUserData("health");
+                }
+        }*/
     }
 
     @Override
@@ -481,13 +548,15 @@ public class Main extends SimpleApplication {
     }
 
     public void makeShotP1(float shotAngle) {
+         shootSoundP1.playInstance(); //sound
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setColor("Color", ColorRGBA.White);
         Sphere sphere = new Sphere(10, 10, 0.5f, true, false);
         // sphere.setTextureMode(Sphere.TextureMode.Projected);
         Geometry ball_geo = new Geometry("cannon ball", sphere);
         ball_geo.setMaterial(mat);
-        rootNode.attachChild(ball_geo);
+      
+        //rootNode.attachChild();
 
         ball_geo.setLocalTranslation(player1.getWorldTranslation().addLocal(0, 1f, 0.5f));
 
@@ -497,17 +566,18 @@ public class Main extends SimpleApplication {
         bulletAppState.getPhysicsSpace().add(ball_phy);
         Vector3f shootDirection = new Vector3f(shotAngle, 0, 1);
         ball_phy.setLinearVelocity(shootDirection.mult(shootSpeed));
-
+        shot.attachChild(ball_geo);
     }
 
     public void makeShotP2(float shotAngle) {
+         shootSoundP2.playInstance(); //sound    
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setColor("Color", ColorRGBA.White);
         Sphere sphere = new Sphere(10, 10, 0.5f, true, false);
         // sphere.setTextureMode(Sphere.TextureMode.Projected);
         Geometry ball_geo = new Geometry("cannon ball", sphere);
         ball_geo.setMaterial(mat);
-        rootNode.attachChild(ball_geo);
+       shot.attachChild(ball_geo);
 
         ball_geo.setLocalTranslation(player2.getWorldTranslation().addLocal(0, 1f, -0.5f));
 
