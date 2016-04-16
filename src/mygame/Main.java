@@ -18,6 +18,7 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
+import com.jme3.scene.shape.Sphere;
 import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
@@ -40,6 +41,9 @@ BetterCharacterControl character2;
 private Node player2;
 private float moveSpeed = 50;
 private float shootSpeed = 50;
+private int offsetP1 = 0;
+
+private int offsetP2 = 0;
     public static void main(String[] args) {
         Main app = new Main();
         app.start();
@@ -74,12 +78,14 @@ private float shootSpeed = 50;
         //create Player 1
       
         character1 = new BetterCharacterControl(0.5f,1,1);
-        player1 = createPlayer(character1,"Player1",new Vector3f(0, 3f, 0));
+        player1 = (createPlayer(character1,"Player1",new Vector3f(0, 3f, 0)));
         
         //create Player 2
        
         character2 = new BetterCharacterControl(0.5f,1,1);
-        player2 = createPlayer(character2,"Player2",new Vector3f(0, 3f, 12));
+        player2 = (createPlayer(character2,"Player2",new Vector3f(0, 3f, 12)));
+        
+        
         //player2.setLocalTranslation(0, 10, 10);
         //character2.setApplyPhysicsLocal(true);
         //character1.setApplyPhysicsLocal(true);
@@ -92,6 +98,15 @@ private float shootSpeed = 50;
         rootNode.attachChild(player2);
         setUpCamera();
     }
+    
+    public void setOffset(int direction,int life){
+        
+        if(life != 3){
+           // if
+        }
+        
+    }
+    
     private ActionListener actionListener = new ActionListener() {
         public void onAction(String name, boolean keyPressed, float tpf) {
 
@@ -124,6 +139,9 @@ private float shootSpeed = 50;
                  System.out.println(cam.getLocation());
              }
              if (name.equals("ShootP2") && !keyPressed) {
+                 incHealth(player1);
+                 System.out.println(getUserHealth(player1));
+                 makeShot();
              }
              if (name.equals("LeftP2")) {
                 if (keyPressed) {
@@ -324,16 +342,17 @@ private float shootSpeed = 50;
             walkDirectionP2.addLocal(new Vector3f (10,0,0));
         }
         if (upP1) {
-            walkDirectionP1.addLocal(new Vector3f (0,0,-10));
+            //walkDirectionP1.addLocal(new Vector3f (0,0,-10));
+           // character1.warp();
         }
         if (upP2) {
-            walkDirectionP2.addLocal(new Vector3f (0,0,-10));
+            //walkDirectionP2.addLocal(new Vector3f (0,0,-10));
         }
         if (downP1) {
-            walkDirectionP1.addLocal(new Vector3f (0,0,10));
+            //walkDirectionP1.addLocal(new Vector3f (0,0,10));
         }
          if (downP2) {
-            walkDirectionP2.addLocal(new Vector3f (0,0,10));
+            //walkDirectionP2.addLocal(new Vector3f (0,0,10));
         }
         
             character1.setWalkDirection(walkDirectionP1);
@@ -348,7 +367,44 @@ private float shootSpeed = 50;
         //TODO: add render code
     }
     
+    public void makeShot() {
+        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setColor("Color", ColorRGBA.White);
+          Sphere sphere = new Sphere(10, 10, 0.4f, true, false);
+       // sphere.setTextureMode(Sphere.TextureMode.Projected);
+        Geometry ball_geo = new Geometry("cannon ball", sphere);
+        ball_geo.setMaterial(mat);
+        rootNode.attachChild(ball_geo);
+
+        ball_geo.setLocalTranslation(player1.getWorldTranslation());
+
+       RigidBodyControl ball_phy = new RigidBodyControl(1f);
+
+        ball_geo.addControl(ball_phy);
+        bulletAppState.getPhysicsSpace().add(ball_phy);
+      
+        ball_phy.setLinearVelocity(character1.getViewDirection().mult(25));
+       
+
+
+    }
     
+    
+    public int getUserHealth(Node playerNode){
+        return Integer.parseInt("" + playerNode.getUserData("health"));
+    }
+    
+    public void setUserHealth(Node playerNode,int value){
+        playerNode.setUserData("health", value);
+    }
+    
+    public void incHealth(Node playerNode){
+        setUserHealth(playerNode,getUserHealth(playerNode)+1);
+    }
+    
+    public void decHealth(Node playerNode){
+        setUserHealth(playerNode,getUserHealth(playerNode)-1);
+    }
   /*  public void setLifePanelText() {
         Screen screen = nifty.getCurrentScreen();
         Element layer = screen.findElementByName("LifePanel");
