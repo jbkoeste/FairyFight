@@ -17,7 +17,9 @@ import com.jme3.scene.Node;
  */
 public class pYListener extends RigidBodyControl
     implements PhysicsCollisionListener {
+    private BulletAppState bulletAppState;
     public pYListener(BulletAppState bulletAppState,Node rootNode) {
+        this.bulletAppState = bulletAppState;
         bulletAppState.getPhysicsSpace().addCollisionListener(this);
     }    
     public void collision(PhysicsCollisionEvent event) {
@@ -28,17 +30,69 @@ public class pYListener extends RigidBodyControl
         if ( event.getNodeA().getName().equals("BlockG") ) {
             if(event.getNodeB().getName().equals("cannon ball")){
                 Geometry A = (Geometry) event.getNodeA();
-               System.out.println( A.getUserData("health"));
-              A.removeFromParent();
+             //  System.out.println( A.getUserData("health"));
+              decHealth(A);
             }
           
             //final Node node = (Node)event.getNodeA();
             
             /** ... do something with the node ... */
         } else  if ( event.getNodeB().getName().equals("cannon ball") ) {
-            if(event.getNodeA().getName().equals("BlockG")){
+            if(event.getNodeA().getName().equals("Node_player2")){
                   System.out.println("shot");
             }
         }
+        
+        if ( event.getNodeA().getName().equals("Node_Player2") ) {
+            
+            if(event.getNodeB().getName().equals("cannon ball")){
+                Node A = (Node) event.getNodeA();
+               System.out.println( A.getUserData("health"));
+              decHealth(A);
+            }
+          
+            //final Node node = (Node)event.getNodeA();
+            
+            /** ... do something with the node ... */
+        } 
+    }
+    
+    public int getUserHealth(Geometry playerNode) {
+        return Integer.parseInt("" + playerNode.getUserData("health"));
+    }
+
+    public void setUserHealth(Geometry playerNode, int value) {
+        playerNode.setUserData("health", value);
+    }
+
+    public void incHealth(Geometry playerNode) {
+        setUserHealth(playerNode, getUserHealth(playerNode) + 1);
+    }
+
+    public void decHealth(Geometry playerNode) {
+        setUserHealth(playerNode, getUserHealth(playerNode) - 1);
+       if( getUserHealth(playerNode) <=0){
+          bulletAppState.getPhysicsSpace().remove(playerNode.getControl(RigidBodyControl.class));
+           playerNode.removeFromParent();
+       }
+    }
+    public int getUserHealth(Node playerNode) {
+        return Integer.parseInt("" + playerNode.getUserData("health"));
+    }
+
+    public void setUserHealth(Node playerNode, int value) {
+        playerNode.setUserData("health", value);
+    }
+
+    public void incHealth(Node playerNode) {
+        setUserHealth(playerNode, getUserHealth(playerNode) + 1);
+    }
+
+    public void decHealth(Node playerNode) {
+        setUserHealth(playerNode, getUserHealth(playerNode) - 1);
+       if( getUserHealth(playerNode) <=0){
+          bulletAppState.getPhysicsSpace().remove(playerNode.getControl(RigidBodyControl.class));
+           playerNode.removeFromParent();
+       }
     }
 }
