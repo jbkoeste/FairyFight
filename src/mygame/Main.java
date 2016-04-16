@@ -14,6 +14,7 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
@@ -21,6 +22,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Sphere;
 import com.jme3.texture.Texture;
+import com.jme3.texture.Texture.WrapMode;
 import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
@@ -312,11 +314,13 @@ public class Main extends SimpleApplication {
         Geometry fieldBottomPlayer1 = createBox(fieldX, 1, fieldY, "Field_p1");
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         
-          Material tex_mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        Material tex_mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         TextureKey key = new TextureKey("Textures/gras.png");
         key.setGenerateMips(true);
         Texture tex2 = assetManager.loadTexture(key);
         tex_mat.setTexture("ColorMap", tex2);
+        tex2.setWrap(WrapMode.Repeat);
+        fieldBottomPlayer1.getMesh().scaleTextureCoordinates(new Vector2f(4, 4));
         //tex_ma
         //TODO TEXTURE
         //tex2.setWrap(Texture.WrapAxis., Texture.WrapMode.Repeat);
@@ -373,6 +377,15 @@ public class Main extends SimpleApplication {
         Node fence = new Node("fence");
         Node fenceLeft = new Node("fenceLeft");
         Node fenceRight = new Node("fenceRight");
+        
+        Material tex_mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        TextureKey key = new TextureKey("Textures/ziegel.png");
+        key.setGenerateMips(true);
+        Texture tex2 = assetManager.loadTexture(key);
+        tex_mat.setTexture("ColorMap", tex2);
+        tex2.setWrap(WrapMode.Repeat);
+        
+        
         for (int j = 0; j < 2; j++) {
 
             for (int i = 0; i < 2 * fieldY + fieldY / 3 + 2; i++) {
@@ -380,15 +393,16 @@ public class Main extends SimpleApplication {
                 fenceGeom.setLocalTranslation(0, j * 2, 2 * i - 2);
 
 
-                Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-                mat.setColor("Color", ColorRGBA.Green);
-                Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-                mat2.setColor("Color", ColorRGBA.Yellow);
-                if (i % 2 == 0) {
-                    fenceGeom.setMaterial(mat2);
-                } else {
-                    fenceGeom.setMaterial(mat);
-                }
+                //Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+                //mat.setColor("Color", ColorRGBA.Green);
+               // Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+                //mat2.setColor("Color", ColorRGBA.Yellow);
+                //if (i % 2 == 0) {
+                   // fenceGeom.setMaterial(mat2);
+                //} else {
+                    fenceGeom.setMaterial(tex_mat);
+                    fenceGeom.getMesh().scaleTextureCoordinates(new Vector2f(1, 1));
+                //}
                 fenceLeft.attachChild(fenceGeom);
                 //fence.setMaterial(mat);
             }
