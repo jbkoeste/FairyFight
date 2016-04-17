@@ -410,7 +410,10 @@ public class Main extends SimpleApplication {
                     //specialBoolP1 = true;
                     Geometry bullet = makeShotP1(shotAngle);
 
-                    if(pY.getSpecialP1()==true)specialGeom = (bullet);
+                    if(pY.getSpecialP1()==true){
+                        System.out.println("true");
+                        specialGeom = (bullet);
+                    }
                     shootPauseP1 = true;
 
                     timeP1 = System.currentTimeMillis();
@@ -528,8 +531,8 @@ public void spawnPowerUp(){
         if (followNode.getParent() == null || timeP1 > timer) {
             System.out.println("Cam");
             setUpCamera();
-            specialBoolP1 = false;
-            specialBoolP2 = false;
+            pY.setSpecialP1(false);
+            pY.setSpecialP2(false);
             specialSpeed = 1f;
             specialSpeedChar = 1f;
         }
@@ -854,8 +857,8 @@ public void spawnPowerUp(){
     @Override
     public void simpleUpdate(float tpf) {
 
-        if (pY.getSpecialP1() == true || specialBoolP2 == true) {
-            setUpSpecialCamera(specialGeom);
+        if (pY.getSpecialP1() == true || specialBoolP2 == true ) {
+            if(specialGeom != null) setUpSpecialCamera(specialGeom);
         }
 
 
