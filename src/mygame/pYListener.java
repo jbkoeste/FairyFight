@@ -4,6 +4,8 @@
  */
 package mygame;
 
+import com.jme3.asset.AssetManager;
+import com.jme3.audio.AudioNode;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.PhysicsCollisionEvent;
 import com.jme3.bullet.collision.PhysicsCollisionListener;
@@ -20,6 +22,8 @@ import com.jme3.scene.Node;
 public class pYListener extends RigidBodyControl
         implements PhysicsCollisionListener {
 
+    private AudioNode hitSound;
+    private AudioNode collisionSound;
     private BulletAppState bulletAppState;
     private int shootFrequency = 500;
     private boolean shootPause = false;
@@ -35,19 +39,27 @@ public class pYListener extends RigidBodyControl
     private Node field2Pl2;
     private Node field3Pl2;
     private Node rootNode;
+    private Boolean specialBoolP1;
+    private Boolean specialBoolP2;
 
-    public pYListener(BulletAppState bulletAppState, Node rootNode, BetterCharacterControl character1, BetterCharacterControl character2, Node field1Pl1, Node field2Pl1, Node field3Pl1, Node field1Pl2, Node field2Pl2, Node field3Pl2) {
+    public pYListener(BulletAppState bulletAppState, Node rootNode, BetterCharacterControl character1, BetterCharacterControl character2, Node field1Pl1, Node field2Pl1, Node field3Pl1, Node field1Pl2, Node field2Pl2, Node field3Pl2, AssetManager assetManager,Boolean specialBoolP1, Boolean specialBoolP2) {
         this.bulletAppState = bulletAppState;
         this.character1 = character1;
         this.character2 = character2;
-        this.field1Pl1 =  field1Pl1;
-        this.field2Pl1 =  field2Pl1;
-        this.field3Pl1 =  field3Pl1;
-        this.field1Pl2 =  field1Pl2;
-        this.field2Pl2 =  field2Pl2;
-        this.field3Pl2 =  field3Pl2;
+        this.field1Pl1 = field1Pl1;
+        this.field2Pl1 = field2Pl1;
+        this.field3Pl1 = field3Pl1;
+        this.field1Pl2 = field1Pl2;
+        this.field2Pl2 = field2Pl2;
+        this.field3Pl2 = field3Pl2;
         this.rootNode = rootNode;
+        this.specialBoolP1 = specialBoolP1;
+        this.specialBoolP2 = specialBoolP2;
         bulletAppState.getPhysicsSpace().addCollisionListener(this);
+        hitSound = new AudioNode(assetManager, "Sounds/Hit_Hurt78.wav", false);
+        rootNode.attachChild(hitSound);
+        collisionSound = new AudioNode(assetManager, "Sounds/collision.wav", false);
+        rootNode.attachChild(collisionSound);
     }
 
     public void collision(PhysicsCollisionEvent event) {
@@ -64,11 +76,12 @@ public class pYListener extends RigidBodyControl
         //  System.out.println(event.getNodeA().getName());
         //   System.out.println(event.getNodeB().getName());
         if (event.getNodeA().getName().equals("BlockG")) {
-            if (event.getNodeB().getName().equals("cannon ball")) {
+            if (event.getNodeB().getName().startsWith("cannon ball")) {
                 Geometry A = (Geometry) event.getNodeA();
                 //  System.out.println( A.getUserData("health"));
                 if (shootPause == false) {
                     decHealth(A);
+                    collisionSound.playInstance();
                     shootPause = true;
                     time = System.currentTimeMillis();
                 }
@@ -79,7 +92,7 @@ public class pYListener extends RigidBodyControl
             /**
              * ... do something with the node ...
              */
-        } else if (event.getNodeB().getName().equals("cannon ball")) {
+        } else if (event.getNodeB().getName().startsWith("cannon ball")) {
             if (event.getNodeA().getName().equals("Node_player2")) {
                 System.out.println("shot");
             }
@@ -87,12 +100,13 @@ public class pYListener extends RigidBodyControl
 
         if (event.getNodeA().getName().equals("Node_Player2")) {
 
-            if (event.getNodeB().getName().equals("cannon ball")) {
+            if (event.getNodeB().getName().startsWith("cannon ball")) {
                 Node A = (Node) event.getNodeA();
-               Geometry B = (Geometry) event.getNodeB();
+                Geometry B = (Geometry) event.getNodeB();
                 if (shootPausePlayer == false) {
                     System.out.println(getUserHealth(A));
                     decHealth(A);
+                    hitSound.playInstance();
                     buildBase(A);
                     removeAll(B);
                     removeRigid(B);
@@ -104,16 +118,34 @@ public class pYListener extends RigidBodyControl
 
         }
 
+        if (event.getNodeA().getName().startsWith("Power")) {
 
+            if (event.getNodeB().getName().startsWith("cannon ball")) {
+                Geometry A = (Geometry) event.getNodeA();
+                Geometry B = (Geometry) event.getNodeB();
+                String name = B.getName();
+                int playerNr = Integer.parseInt(name.substring(name.length() - 1, name.length()));
+                String powerUpStr = A.getName();
+                int powerUpNr = Integer.parseInt(powerUpStr.substring(powerUpStr.length() - 1, powerUpStr.length()));
+                removeAll(B);
+                removeRigid(B);
+                removeAll(A);
+                removeRigid(A);
+                usePowerUp(playerNr, powerUpNr);
+
+            }
+
+        }
 
         if (event.getNodeA().getName().equals("Node_Player1")) {
 
-            if (event.getNodeB().getName().equals("cannon ball")) {
+            if (event.getNodeB().getName().startsWith("cannon ball")) {
                 Node A = (Node) event.getNodeA();
-               Geometry B = (Geometry) event.getNodeB();
+                Geometry B = (Geometry) event.getNodeB();
                 if (shootPausePlayer == false) {
                     System.out.println(getUserHealth(A));
                     decHealth(A);
+                    hitSound.playInstance();
                     buildBase(A);
                     removeAll(B);
                     removeRigid(B);
@@ -126,20 +158,79 @@ public class pYListener extends RigidBodyControl
         }
 
 
-        if (event.getNodeA().getName().equals("death")) {
+        if (event.getNodeA().getName().startsWith("cannon ball")) {
 
-            if (event.getNodeB().getName().equals("Node_Player1")) {
-                Node A = (Node) event.getNodeA();
+            if (event.getNodeA().getName().equals("death")) {
+                Node B = (Node) event.getNodeB();
 
-                System.out.println(getUserHealth(A));
-                decHealth(A);
-                resetPlayer();
+                removeAll(B);
+                removeRigid(B);
 
             }
 
         }
     }
 
+    public void usePowerUp(int playerNr, int powerUpNr) {
+        System.out.println(playerNr +" "+ powerUpNr);
+        switch (powerUpNr) {
+            case 1:
+                if(playerNr ==1){
+                    specialBoolP1 = true;
+                }
+                else{
+                    specialBoolP2 = true;
+                }
+                break;
+            case 2:
+if(playerNr ==1){
+                    specialBoolP1 = true;
+                }
+                else{
+                    specialBoolP2 = true;
+                }
+                break;
+            case 3:
+if(playerNr ==1){
+                    specialBoolP1 = true;
+                }
+                else{
+                    specialBoolP2 = true;
+                }
+                break;
+            case 4:
+if(playerNr ==1){
+                    specialBoolP1 = true;
+                }
+                else{
+                    specialBoolP2 = true;
+                }
+                break;
+            case 5:
+if(playerNr ==1){
+                    specialBoolP1 = true;
+                }
+                else{
+                    specialBoolP2 = true;
+                }
+                break;
+            case 6:
+if(playerNr ==1){
+                    specialBoolP1 = true;
+                }
+                else{
+                    specialBoolP2 = true;
+                }
+                break;
+        }
+    }
+
+    public Boolean getSpecialP1(){
+        return specialBoolP1;
+    }
+     public Boolean getSpecialP2(){
+        return specialBoolP2;
+    }
     public void resetPlayer() {
         character1.warp(new Vector3f(3, 2f, -2));
         character2.warp(new Vector3f(-3, 2f, 18));
@@ -155,8 +246,8 @@ public class pYListener extends RigidBodyControl
 
     public void incHealth(Geometry playerNode) {
         setUserHealth(playerNode, getUserHealth(playerNode) + 1);
-     
-        
+
+
     }
 
     public void decHealth(Geometry playerNode) {
@@ -186,40 +277,42 @@ public class pYListener extends RigidBodyControl
             playerNode.removeFromParent();
         }
     }
-public void removeAll(Node removeNode){
+
+    public void removeAll(Node removeNode) {
         bulletAppState.getPhysicsSpace().remove(removeNode);
         removeNode.removeFromParent();
     }
 
-   public void removeRigid(Node removeNode){
+    public void removeRigid(Node removeNode) {
         // removeNode.removeControl(RigidBodyControl.class);
-         bulletAppState.getPhysicsSpace().remove(removeNode);
+        bulletAppState.getPhysicsSpace().remove(removeNode);
     }
-   public void removeAll(Geometry removeNode){
+
+    public void removeAll(Geometry removeNode) {
         bulletAppState.getPhysicsSpace().remove(removeNode);
         removeNode.removeFromParent();
     }
 
-   public void removeRigid(Geometry removeNode){
+    public void removeRigid(Geometry removeNode) {
         // removeNode.removeControl(RigidBodyControl.class);
-         bulletAppState.getPhysicsSpace().remove(removeNode);
+        bulletAppState.getPhysicsSpace().remove(removeNode);
     }
-   
-     public void buildBase(Node playerNode) {
+
+    public void buildBase(Node playerNode) {
         if (getUserHealth(playerNode) == 3) {
             if (playerNode.getName().equals("Node_Player1") == true) {
-                
-                if ((field2Pl2).getParent() != null ) {
+
+                if ((field2Pl2).getParent() != null) {
                     System.out.println("jj");
                     removeAll(field2Pl2);
                 }
-                if( (field2Pl2).getParent() == null&&(field2Pl2.getControl(RigidBodyControl.class)!=null)){
+                if ((field2Pl2).getParent() == null && (field2Pl2.getControl(RigidBodyControl.class) != null)) {
                     removeRigid(field2Pl2);
                 }
                 if ((field3Pl2).getParent() != null) {
                     removeAll(field3Pl2);
                 }
-                if( (field3Pl2).getParent() == null&&(field3Pl2.getControl(RigidBodyControl.class)!=null)){
+                if ((field3Pl2).getParent() == null && (field3Pl2.getControl(RigidBodyControl.class) != null)) {
                     removeRigid(field3Pl2);
                 }
             } else {
@@ -227,13 +320,13 @@ public void removeAll(Node removeNode){
                 if ((field2Pl1).getParent() != null) {
                     removeAll(field2Pl1);
                 }
-                if( (field2Pl1).getParent() == null&&(field2Pl1.getControl(RigidBodyControl.class)!=null)){
+                if ((field2Pl1).getParent() == null && (field2Pl1.getControl(RigidBodyControl.class) != null)) {
                     removeRigid(field2Pl1);
                 }
                 if ((field3Pl1).getParent() != null) {
                     removeAll(field3Pl1);
                 }
-                if( (field3Pl1).getParent() == null&&(field3Pl1.getControl(RigidBodyControl.class)!=null)){
+                if ((field3Pl1).getParent() == null && (field3Pl1.getControl(RigidBodyControl.class) != null)) {
                     removeRigid(field3Pl1);
                 }
             }
@@ -249,13 +342,13 @@ public void removeAll(Node removeNode){
                 if ((field3Pl2).getParent() != null) {
                     removeAll(field3Pl2);
                 }
-                if( (field3Pl2).getParent() == null&&(field3Pl2.getControl(RigidBodyControl.class)!=null)){
+                if ((field3Pl2).getParent() == null && (field3Pl2.getControl(RigidBodyControl.class) != null)) {
                     removeRigid(field3Pl2);
                 }
             } else {
 
                 if ((field2Pl1).getParent() == null) {
-                     RigidBodyControl rb = new RigidBodyControl(0);
+                    RigidBodyControl rb = new RigidBodyControl(0);
                     field2Pl1.addControl(rb);
                     bulletAppState.getPhysicsSpace().add(field2Pl1);
                     rootNode.attachChild(field2Pl1);
@@ -263,7 +356,7 @@ public void removeAll(Node removeNode){
                 if ((field3Pl1).getParent() != null) {
                     removeAll(field3Pl1);
                 }
-                if( (field3Pl1).getParent() == null&&(field3Pl1.getControl(RigidBodyControl.class)!=null)){
+                if ((field3Pl1).getParent() == null && (field3Pl1.getControl(RigidBodyControl.class) != null)) {
                     removeRigid(field3Pl1);
                 }
             }
@@ -277,7 +370,7 @@ public void removeAll(Node removeNode){
                     rootNode.attachChild(field2Pl2);
                 }
                 if ((field3Pl2).getParent() == null) {
-                      RigidBodyControl rb = new RigidBodyControl(0);
+                    RigidBodyControl rb = new RigidBodyControl(0);
                     field3Pl2.addControl(rb);
                     bulletAppState.getPhysicsSpace().add(field3Pl2);
                     rootNode.attachChild(field3Pl2);
@@ -285,13 +378,13 @@ public void removeAll(Node removeNode){
             } else {
 
                 if ((field2Pl1).getParent() == null) {
-                      RigidBodyControl rb = new RigidBodyControl(0);
+                    RigidBodyControl rb = new RigidBodyControl(0);
                     field2Pl1.addControl(rb);
                     bulletAppState.getPhysicsSpace().add(field2Pl1);
                     rootNode.attachChild(field2Pl1);
                 }
                 if ((field3Pl1).getParent() == null) {
-                      RigidBodyControl rb = new RigidBodyControl(0);
+                    RigidBodyControl rb = new RigidBodyControl(0);
                     field3Pl1.addControl(rb);
                     bulletAppState.getPhysicsSpace().add(field3Pl1);
                     rootNode.attachChild(field3Pl1);

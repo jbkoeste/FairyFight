@@ -95,6 +95,7 @@ public class Main extends SimpleApplication {
     private long specialTimeP1;
     private long specialTimeP2;
     ParticleEmitter fire;
+    pYListener pY;
 
     public static void main(String[] args) {
         Main app = new Main();
@@ -276,7 +277,7 @@ public class Main extends SimpleApplication {
 
         character2 = new BetterCharacterControl(1f, 2, 100);
         player2 = (createPlayer(character2, "Player2", new Vector3f(0, 3f, 12)));
-        pYListener pY = new pYListener(bulletAppState, rootNode, character1, character2, field1Pl1, field2Pl1, field3Pl1, field1Pl2, field2Pl2, field3Pl2, assetManager,specialBoolP1,specialBoolP2);
+        pY = new pYListener(bulletAppState, rootNode, character1, character2, field1Pl1, field2Pl1, field3Pl1, field1Pl2, field2Pl2, field3Pl2, assetManager,specialBoolP1,specialBoolP2);
 
         shot.addControl(pY);
 
@@ -409,7 +410,7 @@ public class Main extends SimpleApplication {
                     //specialBoolP1 = true;
                     Geometry bullet = makeShotP1(shotAngle);
 
-                    if(specialBoolP1==true)specialGeom = (bullet);
+                    if(pY.getSpecialP1()==true)specialGeom = (bullet);
                     shootPauseP1 = true;
 
                     timeP1 = System.currentTimeMillis();
@@ -853,7 +854,7 @@ public void spawnPowerUp(){
     @Override
     public void simpleUpdate(float tpf) {
 
-        if (specialBoolP1 == true || specialBoolP2 == true) {
+        if (pY.getSpecialP1() == true || specialBoolP2 == true) {
             setUpSpecialCamera(specialGeom);
         }
 
@@ -965,7 +966,7 @@ public void spawnPowerUp(){
 
     public Geometry makeShotP1(float shotAngle) {
 
-        if (specialBoolP1 == true) {
+        if (pY.getSpecialP1() == true) {
             specialSpeed = 0.1f;
             specialTimeP1 = System.currentTimeMillis();
         }
