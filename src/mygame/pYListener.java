@@ -42,7 +42,7 @@ public class pYListener extends RigidBodyControl
     private Boolean specialBoolP1;
     private Boolean specialBoolP2;
 
-    public pYListener(BulletAppState bulletAppState, Node rootNode, BetterCharacterControl character1, BetterCharacterControl character2, Node field1Pl1, Node field2Pl1, Node field3Pl1, Node field1Pl2, Node field2Pl2, Node field3Pl2, AssetManager assetManager,Boolean specialBoolP1, Boolean specialBoolP2) {
+    public pYListener(BulletAppState bulletAppState, Node rootNode, BetterCharacterControl character1, BetterCharacterControl character2, Node field1Pl1, Node field2Pl1, Node field3Pl1, Node field1Pl2, Node field2Pl2, Node field3Pl2, AssetManager assetManager, Boolean specialBoolP1, Boolean specialBoolP2) {
         this.bulletAppState = bulletAppState;
         this.character1 = character1;
         this.character2 = character2;
@@ -172,65 +172,69 @@ public class pYListener extends RigidBodyControl
     }
 
     public void usePowerUp(int playerNr, int powerUpNr) {
-        System.out.println(playerNr +" "+ powerUpNr);
+        System.out.println(playerNr + " " + powerUpNr);
         switch (powerUpNr) {
             case 1:
-                if(playerNr ==1){
+                if (playerNr == 1) {
                     specialBoolP1 = true;
-                }
-                else{
+                } else {
                     specialBoolP2 = true;
                 }
                 break;
             case 2:
-if(playerNr ==1){
+                if (playerNr == 1) {
                     specialBoolP1 = true;
-                }
-                else{
+                } else {
                     specialBoolP2 = true;
                 }
                 break;
             case 3:
-if(playerNr ==1){
+                if (playerNr == 1) {
                     specialBoolP1 = true;
-                }
-                else{
+                } else {
                     specialBoolP2 = true;
                 }
                 break;
             case 4:
-if(playerNr ==1){
+                if (playerNr == 1) {
                     specialBoolP1 = true;
-                }
-                else{
+                } else {
                     specialBoolP2 = true;
                 }
                 break;
             case 5:
-if(playerNr ==1){
+                if (playerNr == 1) {
                     specialBoolP1 = true;
-                }
-                else{
+                } else {
                     specialBoolP2 = true;
                 }
                 break;
             case 6:
-if(playerNr ==1){
+                if (playerNr == 1) {
                     specialBoolP1 = true;
-                }
-                else{
+                } else {
                     specialBoolP2 = true;
                 }
                 break;
         }
     }
 
-    public Boolean getSpecialP1(){
+    public Boolean getSpecialP1() {
         return specialBoolP1;
     }
-     public Boolean getSpecialP2(){
+
+    public void setSpecialP1(Boolean value) {
+        specialBoolP1 = value;
+    }
+
+    public Boolean getSpecialP2() {
         return specialBoolP2;
     }
+
+    public void setSpecialP2(Boolean value) {
+        specialBoolP2 = value;
+    }
+
     public void resetPlayer() {
         character1.warp(new Vector3f(3, 2f, -2));
         character2.warp(new Vector3f(-3, 2f, 18));
