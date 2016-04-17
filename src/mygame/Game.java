@@ -1,29 +1,28 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.app.state.AppStateManager;
+import com.jme3.asset.AssetManager;
 import com.jme3.asset.TextureKey;
 import com.jme3.audio.AudioNode;
 import com.jme3.bounding.BoundingVolume;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.control.BetterCharacterControl;
-import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.collision.CollisionResults;
 import com.jme3.effect.ParticleEmitter;
 import com.jme3.effect.ParticleMesh;
 import com.jme3.effect.shapes.EmitterSphereShape;
+import com.jme3.input.FlyByCamera;
+import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
-import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
-import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
-import com.jme3.niftygui.NiftyJmeDisplay;
+import com.jme3.renderer.Camera;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -32,12 +31,7 @@ import com.jme3.scene.shape.Sphere;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
 import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.elements.Element;
-import de.lessvoid.nifty.elements.render.TextRenderer;
-import de.lessvoid.nifty.screen.Screen;
-import static java.lang.Thread.sleep;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import mygame.controllers.GameOverScreenStateController;
 import mygame.controllers.MainMenuScreenStateController;
 
 /**
@@ -45,8 +39,9 @@ import mygame.controllers.MainMenuScreenStateController;
  *
  * @author normenhansen
  */
-public class Main extends SimpleApplication {
+//public class Game extends SimpleApplication {
 
+public class Game {
     public float fieldX = 8;
     public float fieldRatio = 0.75f;
     public float fieldY = fieldX * fieldRatio;
@@ -100,16 +95,37 @@ public class Main extends SimpleApplication {
     ParticleEmitter fire;
     pYListener pY;
     
-    private static Nifty nifty;
-    private MainMenuScreenStateController mainMenuScreenState;
+    private long powerUpTime;
+    long powerUpDownTime;
+    private String shootStr = "Shoot";
+    
+    private static Camera cam;
+    private static FlyByCamera flyCam;
+    private static Node rootNode;
+    private static AppStateManager stateManager;
+    private static AssetManager assetManager;
+    private static InputManager inputManager;
+    private static SimpleApplication gameApp;
+    private Nifty nifty;
 
-    public static void main(String[] args) {
-        Main app = new Main();
-        app.start();
-    }
+//    public static void main(String[] args) {
+//        Main app = new Main();
+//        app.start();
+//    }
      
-     public static Nifty getNifty() {
-        return nifty;
+    public Game() {}
+    
+    public Game(SimpleApplication app) {                
+        cam = app.getCamera();
+        flyCam = app.getFlyByCamera();
+        rootNode = app.getRootNode();
+        stateManager = app.getStateManager();
+        assetManager = app.getAssetManager();
+        inputManager = app.getInputManager();
+        gameApp = app;
+        nifty = Main.getNifty();
+        
+        this.initGame();
     }
 
     public void resetPlayer() {
@@ -139,7 +155,6 @@ public class Main extends SimpleApplication {
     }
 
     public void removeAll(Geometry removeNode) {
-
         bulletAppState.getPhysicsSpace().remove(removeNode);
         removeNode.removeControl(RigidBodyControl.class);
 
@@ -147,353 +162,330 @@ public class Main extends SimpleApplication {
     }
 
     public void buildBase(Node playerNode) {
-//        if (getUserHealth(playerNode) == 3) {
-//            if (playerNode.getName().equals("Node_Player1") == true) {
-//
-//                if ((field2Pl2).getParent() != null) {
-//                    System.out.println("jj");
-//                    removeAll(field2Pl2);
-//                }
-//                if ((field2Pl2).getParent() == null && (field2Pl2.getControl(RigidBodyControl.class) != null)) {
-//                    removeRigid(field2Pl2);
-//                }
-//                if ((field3Pl2).getParent() != null) {
-//                    removeAll(field3Pl2);
-//                }
-//                if ((field3Pl2).getParent() == null && (field3Pl2.getControl(RigidBodyControl.class) != null)) {
-//                    removeRigid(field3Pl2);
-//                }
-//            } else {
-//
-//                if ((field2Pl1).getParent() != null) {
-//                    removeAll(field2Pl1);
-//                }
-//                if ((field2Pl1).getParent() == null && (field2Pl1.getControl(RigidBodyControl.class) != null)) {
-//                    removeRigid(field2Pl1);
-//                }
-//                if ((field3Pl1).getParent() != null) {
-//                    removeAll(field3Pl1);
-//                }
-//                if ((field3Pl1).getParent() == null && (field3Pl1.getControl(RigidBodyControl.class) != null)) {
-//                    removeRigid(field3Pl1);
-//                }
-//            }
-//        } else if (getUserHealth(playerNode) == 2) {
-//            if (playerNode.getName().equals("Node_Player1") == true) {
-//
-//                if ((field2Pl2).getParent() == null) {
-//                    RigidBodyControl rb = new RigidBodyControl(0);
-//                    field2Pl2.addControl(rb);
-//                    bulletAppState.getPhysicsSpace().add(field2Pl2);
-//                    rootNode.attachChild(field2Pl2);
-//                }
-//                if ((field3Pl2).getParent() != null) {
-//                    removeAll(field3Pl2);
-//                }
-//                if ((field3Pl2).getParent() == null && (field3Pl2.getControl(RigidBodyControl.class) != null)) {
-//                    removeRigid(field3Pl2);
-//                }
-//            } else {
-//
-//                if ((field2Pl1).getParent() == null) {
-//                    RigidBodyControl rb = new RigidBodyControl(0);
-//                    field2Pl1.addControl(rb);
-//                    bulletAppState.getPhysicsSpace().add(field2Pl1);
-//                    rootNode.attachChild(field2Pl1);
-//                }
-//                if ((field3Pl1).getParent() != null) {
-//                    removeAll(field3Pl1);
-//                }
-//                if ((field3Pl1).getParent() == null && (field3Pl1.getControl(RigidBodyControl.class) != null)) {
-//                    removeRigid(field3Pl1);
-//                }
-//            }
-//        } else {
-//            if (playerNode.getName().equals("Node_Player1") == true) {
-//
-//                if ((field2Pl2).getParent() == null) {
-//                    RigidBodyControl rb = new RigidBodyControl(0);
-//                    field2Pl2.addControl(rb);
-//                    bulletAppState.getPhysicsSpace().add(field2Pl2);
-//                    rootNode.attachChild(field2Pl2);
-//                }
-//                if ((field3Pl2).getParent() == null) {
-//                    RigidBodyControl rb = new RigidBodyControl(0);
-//                    field3Pl2.addControl(rb);
-//                    bulletAppState.getPhysicsSpace().add(field3Pl2);
-//                    rootNode.attachChild(field3Pl2);
-//                }
-//            } else {
-//
-//                if ((field2Pl1).getParent() == null) {
-//                    RigidBodyControl rb = new RigidBodyControl(0);
-//                    field2Pl1.addControl(rb);
-//                    bulletAppState.getPhysicsSpace().add(field2Pl1);
-//                    rootNode.attachChild(field2Pl1);
-//                }
-//                if ((field3Pl1).getParent() == null) {
-//                    RigidBodyControl rb = new RigidBodyControl(0);
-//                    field3Pl1.addControl(rb);
-//                    bulletAppState.getPhysicsSpace().add(field3Pl1);
-//                    rootNode.attachChild(field3Pl1);
-//                }
-//            }
-//        }
+        if (getUserHealth(playerNode) == 3) {
+            if (playerNode.getName().equals("Node_Player1") == true) {
 
+                if ((field2Pl2).getParent() != null) {
+                    System.out.println("jj");
+                    removeAll(field2Pl2);
+                }
+                if ((field2Pl2).getParent() == null && (field2Pl2.getControl(RigidBodyControl.class) != null)) {
+                    removeRigid(field2Pl2);
+                }
+                if ((field3Pl2).getParent() != null) {
+                    removeAll(field3Pl2);
+                }
+                if ((field3Pl2).getParent() == null && (field3Pl2.getControl(RigidBodyControl.class) != null)) {
+                    removeRigid(field3Pl2);
+                }
+            } else {
+
+                if ((field2Pl1).getParent() != null) {
+                    removeAll(field2Pl1);
+                }
+                if ((field2Pl1).getParent() == null && (field2Pl1.getControl(RigidBodyControl.class) != null)) {
+                    removeRigid(field2Pl1);
+                }
+                if ((field3Pl1).getParent() != null) {
+                    removeAll(field3Pl1);
+                }
+                if ((field3Pl1).getParent() == null && (field3Pl1.getControl(RigidBodyControl.class) != null)) {
+                    removeRigid(field3Pl1);
+                }
+            }
+        } else if (getUserHealth(playerNode) == 2) {
+            if (playerNode.getName().equals("Node_Player1") == true) {
+
+                if ((field2Pl2).getParent() == null) {
+                    RigidBodyControl rb = new RigidBodyControl(0);
+                    field2Pl2.addControl(rb);
+                    bulletAppState.getPhysicsSpace().add(field2Pl2);
+                    rootNode.attachChild(field2Pl2);
+                }
+                if ((field3Pl2).getParent() != null) {
+                    removeAll(field3Pl2);
+                }
+                if ((field3Pl2).getParent() == null && (field3Pl2.getControl(RigidBodyControl.class) != null)) {
+                    removeRigid(field3Pl2);
+                }
+            } else {
+
+                if ((field2Pl1).getParent() == null) {
+                    RigidBodyControl rb = new RigidBodyControl(0);
+                    field2Pl1.addControl(rb);
+                    bulletAppState.getPhysicsSpace().add(field2Pl1);
+                    rootNode.attachChild(field2Pl1);
+                }
+                if ((field3Pl1).getParent() != null) {
+                    removeAll(field3Pl1);
+                }
+                if ((field3Pl1).getParent() == null && (field3Pl1.getControl(RigidBodyControl.class) != null)) {
+                    removeRigid(field3Pl1);
+                }
+            }
+        } else {
+            if (playerNode.getName().equals("Node_Player1") == true) {
+
+                if ((field2Pl2).getParent() == null) {
+                    RigidBodyControl rb = new RigidBodyControl(0);
+                    field2Pl2.addControl(rb);
+                    bulletAppState.getPhysicsSpace().add(field2Pl2);
+                    rootNode.attachChild(field2Pl2);
+                }
+                if ((field3Pl2).getParent() == null) {
+                    RigidBodyControl rb = new RigidBodyControl(0);
+                    field3Pl2.addControl(rb);
+                    bulletAppState.getPhysicsSpace().add(field3Pl2);
+                    rootNode.attachChild(field3Pl2);
+                }
+            } else {
+
+                if ((field2Pl1).getParent() == null) {
+                    RigidBodyControl rb = new RigidBodyControl(0);
+                    field2Pl1.addControl(rb);
+                    bulletAppState.getPhysicsSpace().add(field2Pl1);
+                    rootNode.attachChild(field2Pl1);
+                }
+                if ((field3Pl1).getParent() == null) {
+                    RigidBodyControl rb = new RigidBodyControl(0);
+                    field3Pl1.addControl(rb);
+                    bulletAppState.getPhysicsSpace().add(field3Pl1);
+                    rootNode.attachChild(field3Pl1);
+                }
+            }
+        }
     }
 
-    @Override
-    public void simpleInitApp() {
-        
-        //** start menu test **//
-        
-        // Clean UI
-        flyCam.setEnabled(false);
-        setDisplayFps(false);
-        setDisplayStatView(false);
-        
-//        creditsScreenState = new CreditsScreenStateController(this);
-//        gameOverScreenState = new GameOverScreenStateController(this);       
-//        stateManager.attach(gameOverScreenState);
-//        stateManager.attach(creditsScreenState);
+//    @Override
+    private void initGame() {   
+//    public void simpleInitApp() {
+        powerUpNode = new Node("PowerUpNode");
+        rootNode.attachChild(powerUpNode);
+        random1 = (int) (Math.random() * 10) % 3;
+        random2 = (int) (Math.random() * 10) % 3;
+        random3 = (int) (Math.random() * 10) % 3;
+        // MainMenu m = new MainMenu(assetManager,rootNode,guiViewPort,inputManager);
+        rootNode.attachChild(shot);
+        bulletAppState = new BulletAppState();
+        stateManager.attach(bulletAppState);
 
-        mainMenuScreenState = new MainMenuScreenStateController(this);
-//        stateManager.attach(mainMenuScreenState);
-        
-        NiftyJmeDisplay display = new NiftyJmeDisplay(assetManager, inputManager, audioRenderer, viewPort); //create jme-nifty-processor
-        guiViewPort.addProcessor(display); //add it to your gui-viewport so that the processor will start working
-        nifty = display.getNifty();
-        nifty.gotoScreen("start"); 
-        nifty.fromXml("Interface/MenuScreen.xml", "start", mainMenuScreenState);
-        
-        //** end menu test **//
-//        
-//        powerUpNode = new Node("PowerUpNode");
-//        rootNode.attachChild(powerUpNode);
-//        random1 = (int) (Math.random() * 10) % 3;
-//        random2 = (int) (Math.random() * 10) % 3;
-//        random3 = (int) (Math.random() * 10) % 3;
-//        // MainMenu m = new MainMenu(assetManager,rootNode,guiViewPort,inputManager);
-//        rootNode.attachChild(shot);
-//        bulletAppState = new BulletAppState();
-//        stateManager.attach(bulletAppState);
-//
-//        setUpKeys();
-//
-//        Node fieldNode = new Node("fieldNode");
-//
-//        Node exitNode = new Node("exit");
-//
-//        flyCam.setMoveSpeed(30);
-//
-//
-//        fenceNode.attachChild(createFence());
-//        field1Pl1 = createField(0, 0, 20);
-//        field2Pl1 = createField(0, 0, 16);
-//        field3Pl1 = createField(0, 0, 12);
-//        field1Pl2 = createField(0, 0, -4);
-//        field2Pl2 = createField(0, 0, 0);
-//        field3Pl2 = createField(0, 0, 4);
-//
-//
-//
-//        //fieldNode.attachChild(field);
-//        //createPlayer1();
-//
-//
-//        //create Player 1
-//
-//        character1 = new BetterCharacterControl(1f, 2, 100);
-//        character1.setGravity(new Vector3f(0, 10000, 0));
-//        player1 = (createPlayer(character1, "Player1", new Vector3f(0, 3f, 0)));
-//
-//        //create Player 2
-//
-//        character2 = new BetterCharacterControl(1f, 2, 100);
-//        player2 = (createPlayer(character2, "Player2", new Vector3f(0, 3f, 12)));
-//        pY = new pYListener(bulletAppState, rootNode, character1, character2, field1Pl1, field2Pl1, field3Pl1, field1Pl2, field2Pl2, field3Pl2, assetManager,specialBoolP1,specialBoolP2);
-//
-//        shot.addControl(pY);
-//
-//        //player2.setLocalTranslation(0, 10, 10);
-//        //character2.setApplyPhysicsLocal(true);
-//        //character1.setApplyPhysicsLocal(true);
-//        // exitNode.attachChild(createExit());
-//
-//        rootNode.attachChild(exitNode);
-//        rootNode.attachChild(fenceNode);
-//        rootNode.attachChild(field1Pl1);
-//
-//        rootNode.attachChild(field1Pl2);
-//
-//        //  rootNode.attachChild(createStopper(0,,0));
-//        rootNode.attachChild(player1);
-//        rootNode.attachChild(player2);
-//        deathNode = createDeath();
-//        rootNode.attachChild(deathNode);
-//        buildBase(player1);
-//        buildBase(player2);
-//        // sounds  Menu Sound could also be game sound
-//        shootSoundP1 = new AudioNode(assetManager, "Sounds/shootplayer1.wav", false);
-//        rootNode.attachChild(shootSoundP1);
-//
-//        shootSoundP2 = new AudioNode(assetManager, "Sounds/shootplayer2.wav", false);
-//        rootNode.attachChild(shootSoundP2);
-//
-//        menuSound = new AudioNode(assetManager, "Sounds/MenuSound.wav", false);
-//        menuSound.setLooping(true);
-//        rootNode.attachChild(menuSound);
-//
-//        hitSound = new AudioNode(assetManager, "Sounds/Hit_Hurt78.wav", false);
-//        rootNode.attachChild(hitSound);
-//
-//        collision = new AudioNode(assetManager, "Sounds/collision.wav", false);
-//        rootNode.attachChild(collision);
-//
-//        gameSound = new AudioNode(assetManager, "Sounds/gameSoundBackground.wav", false);
-//        gameSound.setLooping(true);
-//        rootNode.attachChild(gameSound);
-//
-//        powerUp = new AudioNode(assetManager, "Sounds/powerup.wav", false);
-//        rootNode.attachChild(shootSoundP1);
-//
-//        gameSound.play();
-//        if (random3 == 0) {
-//            emitterTest();
-//        }
-//        setUpCamera();
-//        resetPlayer();
-//        spawnPowerUp();
+        setUpKeys();
+
+        Node fieldNode = new Node("fieldNode");
+        Node exitNode = new Node("exit");
+
+        flyCam.setMoveSpeed(30);
+
+        fenceNode.attachChild(createFence());
+        field1Pl1 = createField(0, 0, 20);
+        field2Pl1 = createField(0, 0, 16);
+        field3Pl1 = createField(0, 0, 12);
+        field1Pl2 = createField(0, 0, -4);
+        field2Pl2 = createField(0, 0, 0);
+        field3Pl2 = createField(0, 0, 4);
+
+        //fieldNode.attachChild(field);
+        //createPlayer1();
+
+        //create Player 1
+
+        character1 = new BetterCharacterControl(1f, 2, 100);
+        character1.setGravity(new Vector3f(0, 10000, 0));
+        player1 = (createPlayer(character1, "Player1", new Vector3f(0, 3f, 0)));
+
+        //create Player 2
+
+        character2 = new BetterCharacterControl(1f, 2, 100);
+        player2 = (createPlayer(character2, "Player2", new Vector3f(0, 3f, 12)));
+        pY = new pYListener(bulletAppState, rootNode, character1, character2, field1Pl1, field2Pl1, field3Pl1, field1Pl2, field2Pl2, field3Pl2, assetManager,specialBoolP1,specialBoolP2);
+
+        shot.addControl(pY);
+
+        //player2.setLocalTranslation(0, 10, 10);
+        //character2.setApplyPhysicsLocal(true);
+        //character1.setApplyPhysicsLocal(true);
+        // exitNode.attachChild(createExit());
+
+        rootNode.attachChild(exitNode);
+        rootNode.attachChild(fenceNode);
+        rootNode.attachChild(field1Pl1);
+
+        rootNode.attachChild(field1Pl2);
+
+        //  rootNode.attachChild(createStopper(0,,0));
+        rootNode.attachChild(player1);
+        rootNode.attachChild(player2);
+        deathNode = createDeath();
+        rootNode.attachChild(deathNode);
+        buildBase(player1);
+        buildBase(player2);
+        // sounds  Menu Sound could also be game sound
+        shootSoundP1 = new AudioNode(assetManager, "Sounds/shootplayer1.wav", false);
+        rootNode.attachChild(shootSoundP1);
+
+        shootSoundP2 = new AudioNode(assetManager, "Sounds/shootplayer2.wav", false);
+        rootNode.attachChild(shootSoundP2);
+
+        menuSound = new AudioNode(assetManager, "Sounds/MenuSound.wav", false);
+        menuSound.setLooping(true);
+        rootNode.attachChild(menuSound);
+
+        hitSound = new AudioNode(assetManager, "Sounds/Hit_Hurt78.wav", false);
+        rootNode.attachChild(hitSound);
+
+        collision = new AudioNode(assetManager, "Sounds/collision.wav", false);
+        rootNode.attachChild(collision);
+
+        gameSound = new AudioNode(assetManager, "Sounds/gameSoundBackground.wav", false);
+        gameSound.setLooping(true);
+        rootNode.attachChild(gameSound);
+
+        powerUp = new AudioNode(assetManager, "Sounds/powerup.wav", false);
+        rootNode.attachChild(shootSoundP1);
+
+        gameSound.play();
+        if (random3 == 0) {
+            emitterTest();
+        }
+        setUpCamera();
+        resetPlayer();
+        spawnPowerUp();
+        powerUpDownTime = System.currentTimeMillis();
+           
+//        Spatial model = assetManager.loadModel("Models/model.max");     
+//        rootNode.attachChild(model);
     }
 
     public void setOffset(int direction, int life) {
-
         if (life != 3) {
             // if
         }
-
     }
+    
     private ActionListener actionListener = new ActionListener() {
         public void onAction(String name, boolean keyPressed, float tpf) {
+            if (name.equals("LeftP1")) {
+                if (keyPressed) {
+                    leftP1 = true;
+                } else {
+                    leftP1 = false;
+                }
+            } else if (name.equals("RightP1")) {
+                if (keyPressed) {
+                    rightP1 = true;
+                } else {
+                    rightP1 = false;
+                }
+            } else if (name.equals("UpP1")) {
+                if (keyPressed) {
+                    upP1 = true;
+                } else {
+                    upP1 = false;
+                }
+            } else if (name.equals("DownP1")) {
+                if (keyPressed) {
+                    downP1 = true;
+                } else {
+                    downP1 = false;
+                }
+            }
 
-//            if (name.equals("LeftP1")) {
-//                if (keyPressed) {
-//                    leftP1 = true;
-//                } else {
-//                    leftP1 = false;
-//                }
-//            } else if (name.equals("RightP1")) {
-//                if (keyPressed) {
-//                    rightP1 = true;
-//                } else {
-//                    rightP1 = false;
-//                }
-//            } else if (name.equals("UpP1")) {
-//                if (keyPressed) {
-//                    upP1 = true;
-//                } else {
-//                    upP1 = false;
-//                }
-//            } else if (name.equals("DownP1")) {
-//                if (keyPressed) {
-//                    downP1 = true;
-//                } else {
-//                    downP1 = false;
-//                }
-//            }
-//
-//            if (name.equals("AimLeftP1")) {
-//                if (keyPressed) {
-//                    angleLeftP1 = true;
-//                } else {
-//                    angleLeftP1 = false;
-//                }
-//            } else if (name.equals("AimRightP1")) {
-//                if (keyPressed) {
-//                    angleRightP1 = true;
-//                } else {
-//                    angleRightP1 = false;
-//                }
-//            }
-//
-//            if (name.equals("AimLeftP2")) {
-//                if (keyPressed) {
-//                    angleLeftP2 = true;
-//                } else {
-//                    angleLeftP2 = false;
-//                }
-//            } else if (name.equals("AimRightP2")) {
-//                if (keyPressed) {
-//                    angleRightP2 = true;
-//                } else {
-//                    angleRightP2 = false;
-//                }
-//            }
-//
-//
+            if (name.equals("AimLeftP1")) {
+                if (keyPressed) {
+                    angleLeftP1 = true;
+                } else {
+                    angleLeftP1 = false;
+                }
+            } else if (name.equals("AimRightP1")) {
+                if (keyPressed) {
+                    angleRightP1 = true;
+                } else {
+                    angleRightP1 = false;
+                }
+            }
+
+            if (name.equals("AimLeftP2")) {
+                if (keyPressed) {
+                    angleLeftP2 = true;
+                } else {
+                    angleLeftP2 = false;
+                }
+            } else if (name.equals("AimRightP2")) {
+                if (keyPressed) {
+                    angleRightP2 = true;
+                } else {
+                    angleRightP2 = false;
+                }
+            }
+
 //            if (name.equals("ShootP1") && !keyPressed) {
-//                float shotAngle = 0;
-//                if (angleLeftP1 == true) {
-//                    shotAngle = -0.5f;
-//                } else if (angleRightP1 == true) {
-//                    shotAngle = 0.5f;
-//                } else {
-//                    shotAngle = 0;
-//                }
-//                if (shootPauseP1 == false) {
-//                    //specialBoolP1 = true;
-//                    Geometry bullet = makeShotP1(shotAngle);
-//
-//                    if(pY.getSpecialP1()==true)specialGeom = (bullet);
-//                    shootPauseP1 = true;
-//
-//                    timeP1 = System.currentTimeMillis();
-//                }
-//            }
-//
+            if (name.equals(shootStr+"P1") && !keyPressed) {
+                float shotAngle = 0;
+                if (angleLeftP1 == true) {
+                    shotAngle = -0.5f;
+                } else if (angleRightP1 == true) {
+                    shotAngle = 0.5f;
+                } else {
+                    shotAngle = 0;
+                }
+                if (shootPauseP1 == false) {
+                    //specialBoolP1 = true;
+                    Geometry bullet = makeShotP1(shotAngle);
+
+                    if(pY.getSpecialP1()==true)specialGeom = (bullet);
+                    shootPauseP1 = true;
+
+                    timeP1 = System.currentTimeMillis();
+                }
+            }
+
 //            if (name.equals("ShootP2") && !keyPressed) {
-//                float shotAngle = 0;
-//                if (angleLeftP2 == true) {
-//                    shotAngle = -0.5f;
-//                } else if (angleRightP2 == true) {
-//                    shotAngle = 0.5f;
-//                } else {
-//                    shotAngle = 0;
-//                }
-//                if (shootPauseP2 == false) {
-//                    Geometry bullet = makeShotP2(shotAngle);
-//
+            if (name.equals(shootStr+"P2") && !keyPressed) {
+                float shotAngle = 0;
+                if (angleLeftP2 == true) {
+                    shotAngle = -0.5f;
+                } else if (angleRightP2 == true) {
+                    shotAngle = 0.5f;
+                } else {
+                    shotAngle = 0;
+                }
+                if (shootPauseP2 == false) {
+                    Geometry bullet = makeShotP2(shotAngle);
+
 //                    if(specialBoolP2==true)specialGeom = (bullet);
-//                    shootPauseP2 = true;
-//
-//                    timeP2 = System.currentTimeMillis();
-//                }
-//            }
-//            if (name.equals("LeftP2")) {
-//                if (keyPressed) {
-//                    leftP2 = true;
-//                } else {
-//                    leftP2 = false;
-//                }
-//            } else if (name.equals("RightP2")) {
-//                if (keyPressed) {
-//                    rightP2 = true;
-//                } else {
-//                    rightP2 = false;
-//                }
-//            } else if (name.equals("UpP2")) {
-//                if (keyPressed) {
-//                    upP2 = true;
-//                } else {
-//                    upP2 = false;
-//                }
-//            } else if (name.equals("DownP2")) {
-//                if (keyPressed) {
-//                    downP2 = true;
-//                } else {
-//                    downP2 = false;
-//                }
-//            }
+                    if (pY.getSpecialP2() == true) {
+                        specialGeom = (bullet);
+                    }
+                    shootPauseP2 = true;
+
+                    timeP2 = System.currentTimeMillis();
+                }
+            }
+            if (name.equals("LeftP2")) {
+                if (keyPressed) {
+                    leftP2 = true;
+                } else {
+                    leftP2 = false;
+                }
+            } else if (name.equals("RightP2")) {
+                if (keyPressed) {
+                    rightP2 = true;
+                } else {
+                    rightP2 = false;
+                }
+            } else if (name.equals("UpP2")) {
+                if (keyPressed) {
+                    upP2 = true;
+                } else {
+                    upP2 = false;
+                }
+            } else if (name.equals("DownP2")) {
+                if (keyPressed) {
+                    downP2 = true;
+                } else {
+                    downP2 = false;
+                }
+            }
         }
     };
 
@@ -502,40 +494,60 @@ public class Main extends SimpleApplication {
         cam.setLocation(new Vector3f(0, 28, 35));
         cam.lookAt(new Vector3f(0, 0, 10), Vector3f.UNIT_Y);
     }
-public void spawnPowerUp(){
-    int randomPl1 =(int)((Math.random() * 6) + 1);
-    int randomXPl1 = (int)((Math.random() * fieldX) + 1);
-    int randomPl2 =(int)((Math.random() * 6) + 1);
-    int randomXPl2 = (int)((Math.random() * fieldX) + 1);
-    createPowerUp(randomXPl1,1.5f,-8,randomPl1);
-    createPowerUp(randomXPl2,1.5f,24,randomPl2);
-}
+    
+    public void spawnPowerUp(){
+        powerUpTime = System.currentTimeMillis();
+        int randomPl1 = (int) ((Math.random() * 6) + 1);
+        int randomXPl1 = (int) ((Math.random() * fieldX * 2 - 2) + 1);
+        int randomPl2 = (int) ((Math.random() * 6) + 1);
+        int randomXPl2 = (int) ((Math.random() * fieldX * 2 - 2) + 1);
+        createPowerUp(randomXPl1 - fieldX + 1, 1.5f, -8, randomPl1);
+        createPowerUp(randomXPl2 - fieldX + 1, 1.5f, 24, randomPl2);
+    }
+    
+    public void checkPowerUpTime() {
+        long timer = System.currentTimeMillis() - powerUpTime;
+        if (timer > 2000) {
+            int size = powerUpNode.getChildren().size();
+            for (int i = 0; i < size; i++) {
+
+                removeAll((Geometry) powerUpNode.getChild(0));
+            }
+            //powerUpDownTime = System.currentTimeMillis();
+            powerUpSpawnTimer();
+        }
+    }
+
+    public void powerUpSpawnTimer() {
+        long timer = System.currentTimeMillis() - powerUpDownTime;
+
+        if (timer > 2000) {
+            spawnPowerUp();
+            powerUpDownTime = System.currentTimeMillis();
+        }
+    }
+ 
     public void createPowerUp(float x, float z, float y, int powerUpInt) {
         String powerUpName = "";
         switch (powerUpInt) {
             case 1:
                 powerUpName = "Power1";
                 break;
-
             case 2:
                 powerUpName = "Power2";
-                break;
-                
+                break;                
             case 3:
                 powerUpName = "Power3";
-                break;
-                
+                break;             
             case 4:
                 powerUpName = "Power4";
-                break;
-                
+                break;      
             case 5:
                 powerUpName = "Power5";
                 break;
             case 6:
                 powerUpName = "Power6";
             break;
-
         }
         Geometry powerUp = createBox(0.5f, 0.5f, 0.5f, powerUpName);
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -549,7 +561,8 @@ public void spawnPowerUp(){
         powerUpNode.attachChild(powerUp);
     }
 
-    private void setUpSpecialCamera(Geometry followNode) {
+    private void setUpSpecialCamera(Geometry followNode) {       
+       shootStr = "";
         specialSpeed = 0.1f;
         specialSpeedChar = 0.03f;
         cam.setLocation(new Vector3f(0, 35, 0));
@@ -558,14 +571,27 @@ public void spawnPowerUp(){
         long timeP1 = System.currentTimeMillis() - specialTimeP1;
         long timeP2 = System.currentTimeMillis() - specialTimeP2;
         int timer = 5000;
+        String name = followNode.getName();
 
-        if (followNode.getParent() == null || timeP1 > timer) {
-            System.out.println("Cam");
+        int playerNr = Integer.parseInt(name.substring(name.length() - 1, name.length()));
+
+        if (followNode.getParent() == null || (playerNr == 1 && (timeP1 > timer)) || (playerNr == 2 && (timeP2 > timer))) {
+            shootPauseP1 = false;
+            shootPauseP2 = false;
             setUpCamera();
-            specialBoolP1 = false;
-            specialBoolP2 = false;
+
+            if (playerNr == 1) {
+                pY.setSpecialP1(false);
+            }
+            if (playerNr == 2) {
+                pY.setSpecialP2(false);
+            }
             specialSpeed = 1f;
             specialSpeedChar = 1f;
+             shootStr = "Shoot";
+            //specialTimeP1 = 0;
+            //specialTimeP2= 0;
+           specialGeom= null;
         }
     }
 
@@ -599,12 +625,9 @@ public void spawnPowerUp(){
         inputManager.addListener(actionListener, "ShootP2");
         inputManager.addListener(actionListener, "AimLeftP2");
         inputManager.addListener(actionListener, "AimRightP2");
-
     }
 
     public Node createPlayer(BetterCharacterControl charC, String playerName, Vector3f location) {
-
-
         Node charNode1 = new Node();
         charNode1.setName("Node_" + playerName);
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -630,7 +653,6 @@ public void spawnPowerUp(){
         Box b = new Box(sizeX, sizeY, sizeZ);
         Geometry geom = new Geometry(name, b);
         return geom;
-
     }
 
     public Node createDeath() {
@@ -708,9 +730,7 @@ public void spawnPowerUp(){
         rootNode.attachChild(fire);
 
         fire.updateLogicalState(0);
-
         fire.updateGeometricState();
-
     }
 
     public Node createField(float x, float z, float y) {
@@ -789,7 +809,6 @@ public void spawnPowerUp(){
         exitBack.attachChild(fenceGeomBack);
         exit.attachChild(exitBack);
         return exit;
-
     }
 
     public Node createFence() {
@@ -810,21 +829,17 @@ public void spawnPowerUp(){
                 str = "gras";
                 break;
         }
+        
         TextureKey key = new TextureKey("Textures/" + str + ".png");
         key.setGenerateMips(true);
         Texture tex2 = assetManager.loadTexture(key);
         tex_mat.setTexture("ColorMap", tex2);
         tex2.setWrap(WrapMode.Repeat);
 
-
         for (int j = 0; j < 2; j++) {
-
             for (int i = 0; i < 2 * fieldY + fieldY / 3 + 2; i++) {
-
                 Geometry fenceGeom = createBox(1, 1, 1, "BlockG");
                 fenceGeom.setLocalTranslation(fieldX + 1, j * 2, 2 * i - 2 - fieldY + 1);
-
-
                 //Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
                 //mat.setColor("Color", ColorRGBA.Green);
                 // Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -845,13 +860,9 @@ public void spawnPowerUp(){
         }
 
         for (int j = 0; j < 2; j++) {
-
             for (int i = 0; i < 2 * fieldY + fieldY / 3 + 2; i++) {
-
                 Geometry fenceGeom = createBox(1, 1, 1, "BlockG");
                 fenceGeom.setLocalTranslation(-fieldX - 1, j * 2, 2 * i + -2 - fieldY + 1);
-
-
                 //Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
                 //mat.setColor("Color", ColorRGBA.Green);
                 // Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -878,128 +889,123 @@ public void spawnPowerUp(){
         fence.attachChild(fenceLeft);
         fence.attachChild(fenceRight);
 
-
         return fence;
     }
 
     public void createPlayer2() {
     }
-//
-//    @Override
-//    public void simpleUpdate(float tpf) {
-////
-////        if (pY.getSpecialP1() == true || specialBoolP2 == true) {
-////            setUpSpecialCamera(specialGeom);
-////        }
-////
-////
-////
-////        long timeSpentP1 = System.currentTimeMillis() - timeP1;
-////        if (timeSpentP1 > shootFrequency) {
-////            shootPauseP1 = false;
-////        }
-////
-////        long timeSpentP2 = System.currentTimeMillis() - timeP2;
-////        if (timeSpentP2 > shootFrequency) {
-////            shootPauseP2 = false;
-////        }
-////
-////
-////        Vector3f walkDirectionP1 = new Vector3f();
-////        walkDirectionP1.set(0, 0, 0);
-////        Vector3f walkDirectionP2 = new Vector3f();
-////        walkDirectionP2.set(0, 0, 0);
-////
-////        if (leftP1) {
-////            walkDirectionP1.addLocal(new Vector3f(-10 * specialSpeedChar, 0, 0));
-////        }
-////        if (leftP2) {
-////            walkDirectionP2.addLocal(new Vector3f(-10 * specialSpeedChar, 0, 0));
-////        }
-////        if (rightP1) {
-////            walkDirectionP1.addLocal(new Vector3f(10 * specialSpeedChar, 0, 0));
-////        }
-////        if (rightP2) {
-////            walkDirectionP2.addLocal(new Vector3f(10 * specialSpeedChar, 0, 0));
-////        }
-////        if (upP1) {
-////            walkDirectionP1.addLocal(new Vector3f(0, 0, -10 * specialSpeedChar));
-////            // character1.warp();
-////        }
-////        if (upP2) {
-////            walkDirectionP2.addLocal(new Vector3f(0, 0, -10 * specialSpeedChar));
-////        }
-////        if (downP1) {
-////            walkDirectionP1.addLocal(new Vector3f(0, 0, 10 * specialSpeedChar));
-////        }
-////        if (downP2) {
-////            walkDirectionP2.addLocal(new Vector3f(0, 0, 10 * specialSpeedChar));
-////        }
-////
-////        character1.setWalkDirection(walkDirectionP1);
-////        walkDirectionP1.multLocal(1000 * moveSpeed).multLocal(tpf);
-////        character2.setWalkDirection(walkDirectionP2);
-////        walkDirectionP2.multLocal(1000 * moveSpeed).multLocal(tpf);
-////
-////
-////
-////        BoundingVolume bvP1 = player1.getWorldBound();
-////        CollisionResults results = new CollisionResults();
-////        deathNode.collideWith(bvP1, results);
-////        if (results.size() > 0) {
-////            //   Geometry hit = results.getClosestCollision().getGeometry();
-////            //  System.out.println(hit.getName() + "  " + hit.getUserData("health"));
-////            //   String healthStr = hit.getUserData("health");
-////            decHealth(player1);
-////            // System.out.println(getUserHealth(player1));
-////            buildBase(player1);
-////            buildBase(player2);
-////            collision.playInstance();
-////            resetPlayer();
-////
-////        }
-////        BoundingVolume bvP2 = player2.getWorldBound();
-////        results = new CollisionResults();
-////        deathNode.collideWith(bvP2, results);
-////        if (results.size() > 0) {
-////            decHealth(player2);
-////            resetPlayer();
-////            buildBase(player1);
-////            buildBase(player2);
-////            collision.playInstance();
-////            resetPlayer();
-////        }
-////
-////        BoundingVolume bvShot = deathNode.getWorldBound();
-////        results = new CollisionResults();
-////        shot.collideWith(bvShot, results);
-////        if (results.size() > 0) {
-////            Geometry geom = results.getClosestCollision().getGeometry();
-////            removeAll(geom);
-////            // removeRigid(geom);
-//
-//        }
-//       /* 
-//        BoundingVolume bvPower = powerUpNode.getWorldBound();
-//        results = new CollisionResults();
-//        shot.collideWith(bvPower, results);
-//        if (results.size() > 0) {
-//            System.out.println("0");
-//            Geometry geom = results.getClosestCollision().getGeometry();
-//            removeAll(geom);
-//            // removeRigid(geom);
-//
-//        }*/
-//        // }
-//    }
 
-    @Override
+//    @Override
+    public void simpleUpdate(float tpf) {
+        if (pY.getSpecialP1() == true || pY.getSpecialP2() == true) {
+            if (specialGeom != null) {            
+                setUpSpecialCamera(specialGeom);
+            }
+        }
+
+        checkPowerUpTime();
+
+        long timeSpentP1 = System.currentTimeMillis() - timeP1;
+        if (timeSpentP1 > shootFrequency) {
+            shootPauseP1 = false;
+        }
+
+        long timeSpentP2 = System.currentTimeMillis() - timeP2;
+        if (timeSpentP2 > shootFrequency) {
+            shootPauseP2 = false;
+        }
+
+        Vector3f walkDirectionP1 = new Vector3f();
+        walkDirectionP1.set(0, 0, 0);
+        Vector3f walkDirectionP2 = new Vector3f();
+        walkDirectionP2.set(0, 0, 0);
+
+        if (leftP1) {
+            walkDirectionP1.addLocal(new Vector3f(-10 * specialSpeedChar, 0, 0));
+        }
+        if (leftP2) {
+            walkDirectionP2.addLocal(new Vector3f(-10 * specialSpeedChar, 0, 0));
+        }
+        if (rightP1) {
+            walkDirectionP1.addLocal(new Vector3f(10 * specialSpeedChar, 0, 0));
+        }
+        if (rightP2) {
+            walkDirectionP2.addLocal(new Vector3f(10 * specialSpeedChar, 0, 0));
+        }
+        if (upP1) {
+            walkDirectionP1.addLocal(new Vector3f(0, 0, -10 * specialSpeedChar));
+            // character1.warp();
+        }
+        if (upP2) {
+            walkDirectionP2.addLocal(new Vector3f(0, 0, -10 * specialSpeedChar));
+        }
+        if (downP1) {
+            walkDirectionP1.addLocal(new Vector3f(0, 0, 10 * specialSpeedChar));
+        }
+        if (downP2) {
+            walkDirectionP2.addLocal(new Vector3f(0, 0, 10 * specialSpeedChar));
+        }
+
+        character1.setWalkDirection(walkDirectionP1);
+        walkDirectionP1.multLocal(1000 * moveSpeed).multLocal(tpf);
+        character2.setWalkDirection(walkDirectionP2);
+        walkDirectionP2.multLocal(1000 * moveSpeed).multLocal(tpf);
+
+        BoundingVolume bvP1 = player1.getWorldBound();
+        CollisionResults results = new CollisionResults();
+        deathNode.collideWith(bvP1, results);
+        if (results.size() > 0) {
+            //   Geometry hit = results.getClosestCollision().getGeometry();
+            //  System.out.println(hit.getName() + "  " + hit.getUserData("health"));
+            //   String healthStr = hit.getUserData("health");
+            decHealth(player1);
+            // System.out.println(getUserHealth(player1));
+            buildBase(player1);
+            buildBase(player2);
+            collision.playInstance();
+            resetPlayer();
+        }
+        
+        BoundingVolume bvP2 = player2.getWorldBound();
+        results = new CollisionResults();
+        deathNode.collideWith(bvP2, results);
+        if (results.size() > 0) {
+            decHealth(player2);
+            resetPlayer();
+            buildBase(player1);
+            buildBase(player2);
+            collision.playInstance();
+            resetPlayer();
+        }
+
+        BoundingVolume bvShot = deathNode.getWorldBound();
+        results = new CollisionResults();
+        shot.collideWith(bvShot, results);
+        if (results.size() > 0) {
+            Geometry geom = results.getClosestCollision().getGeometry();
+            removeAll(geom);
+            // removeRigid(geom);
+        }
+       /* 
+        BoundingVolume bvPower = powerUpNode.getWorldBound();
+        results = new CollisionResults();
+        shot.collideWith(bvPower, results);
+        if (results.size() > 0) {
+            System.out.println("0");
+            Geometry geom = results.getClosestCollision().getGeometry();
+            removeAll(geom);
+            // removeRigid(geom);
+
+        }*/
+        // }
+    }
+
+//    @Override
     public void simpleRender(RenderManager rm) {
         //TODO: add render code
     }
 
     public Geometry makeShotP1(float shotAngle) {
-
         if (pY.getSpecialP1() == true) {
             specialSpeed = 0.1f;
             specialTimeP1 = System.currentTimeMillis();
@@ -1023,8 +1029,8 @@ public void spawnPowerUp(){
     }
 
     public Geometry makeShotP2(float shotAngle) {
-
-        if (specialBoolP2 == true) {
+//        if (specialBoolP2 == true) {
+        if (pY.getSpecialP2() == true) {        
             specialSpeed = 0.1f;
             specialTimeP2 = System.currentTimeMillis();
         }
@@ -1067,8 +1073,16 @@ public void spawnPowerUp(){
             bulletAppState.getPhysicsSpace().remove(playerNode.getControl(RigidBodyControl.class));
             playerNode.removeFromParent();
             //TODO GAMEEND
+            GameOverScreenStateController gameOverScreenState = new GameOverScreenStateController(gameApp, this);
+            gameApp.getStateManager().attach(gameOverScreenState);
+            nifty.gotoScreen("gameover");
+            
+//            MainMenuScreenStateController mainMenuScreenState = new MainMenuScreenStateController(gameApp);
+//            gameApp.getStateManager().attach(mainMenuScreenState);
+//            nifty.gotoScreen("start");
         }
     }
+    
     /*  public void setLifePanelText() {
      Screen screen = nifty.getCurrentScreen();
      Element layer = screen.findElementByName("LifePanel");

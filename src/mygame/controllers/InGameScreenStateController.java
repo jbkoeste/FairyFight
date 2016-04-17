@@ -1,3 +1,7 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package mygame.controllers;
 
 import com.jme3.app.Application;
@@ -6,7 +10,6 @@ import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
 import com.jme3.input.InputManager;
-import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Node;
 import de.lessvoid.nifty.Nifty;
@@ -15,8 +18,13 @@ import de.lessvoid.nifty.screen.ScreenController;
 import mygame.Game;
 import mygame.Main;
 
-public class GameOverScreenStateController extends AbstractAppState implements ScreenController {
+/**
+ *
+ * @author bub
+ */
+public class InGameScreenStateController extends AbstractAppState implements ScreenController {
     private Nifty nifty;
+    private Screen screen;
     
     private AssetManager assetManager;
     private Node rootNode;
@@ -25,13 +33,14 @@ public class GameOverScreenStateController extends AbstractAppState implements S
     private SimpleApplication game;
     private Game theGame;
     
-    public GameOverScreenStateController(SimpleApplication app, Game runningGame) {
+//    public InGameScreenStateController(SimpleApplication app) {
+    public InGameScreenStateController(SimpleApplication app, Game newGame) {
         assetManager = app.getAssetManager();
         rootNode = app.getRootNode();
         guiViewPort = app.getViewPort();
         inputManager = app.getInputManager();
         game = app;
-        theGame = runningGame;
+        theGame = newGame;
         nifty = Main.getNifty();
     }
     
@@ -45,9 +54,6 @@ public class GameOverScreenStateController extends AbstractAppState implements S
     @Override
     public void cleanup() {
       super.cleanup();
-      // unregister all my listeners, detach all my nodes, etc...
-//      this.app.getRootNode().detachChild(getX()); // modify scene graph...
-//      this.app.doSomethingElse();                 // call custom methods...
     }
  
     @Override
@@ -55,43 +61,40 @@ public class GameOverScreenStateController extends AbstractAppState implements S
       // Pause and unpause
       super.setEnabled(enabled);
       if(enabled){
-        // init stuff that is in use while this state is RUNNING
-//        this.app.getRootNode().attachChild(getX()); // modify scene graph...
-//        this.app.doSomethingElse();                 // call custom methods...
+          
       } else {
-        // take away everything not needed while this state is PAUSED
+
       }
     }
  
     // Note that update is only called while the state is both attached and enabled.
     @Override
     public void update(float tpf) {
-      // do the following while game is RUNNING
-//      this.app.getRootNode().getChild("blah").scale(tpf); // modify scene graph...
-//      x.setUserData(...);                                 // call some methods...
+        theGame.simpleUpdate(tpf);
     }
         
-    public void init(AssetManager assetManager, Node rootNode, ViewPort view, InputManager inputManager) {   
-        nifty.fromXml("Interface/GameOverScreen.xml", "gameover", this);
+    public void init(AssetManager assetManager, Node rootNode, ViewPort view, InputManager inputManager) {
+        nifty.fromXml("Interface/InGameScreen.xml", "ingame", this);
         inputManager.setCursorVisible(true);
     }
 
     public void bind(Nifty nifty, Screen screen) {
-        System.out.println("bind( " + screen.getScreenId() + ") - game over");
+        this.nifty = nifty;
+        this.screen = screen;
+        System.out.println("bind( " + screen.getScreenId() + ") - in game");
     }
 
     public void onStartScreen() {
-        System.out.println("onStartScreen - game over");
+        System.out.println("onStartScreen - in game");
     }
 
     public void onEndScreen() {
-        System.out.println("onEndScreen - game over");
+        System.out.println("onEndScreen - in game");
     }
 
-    public void returnToMainMenu() { 
+    public void returnToMainMenu() {
         MainMenuScreenStateController mainMenuScreenState = new MainMenuScreenStateController(game);
         game.getStateManager().attach(mainMenuScreenState);
         nifty.gotoScreen("start");
     }
 }
-

@@ -2,46 +2,66 @@
 <nifty xmlns="http://nifty-gui.sourceforge.net/nifty-1.3.xsd" 
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
        xsi:schemaLocation="http://nifty-gui.sourceforge.net/nifty-1.3.xsd http://nifty-gui.sourceforge.net/nifty-1.3.xsd">
+  <useStyles filename="nifty-default-styles.xml" />
+  <useStyles filename="Interface/Styles/FFCustomStyles.xml" />
+  <useControls filename="nifty-default-controls.xml" />
+  
     <!-- +++++++++++++++++++++++++++++++++++++++ -->
     <!-- start screen -->
     <!-- +++++++++++++++++++++++++++++++++++++++ -->
-<useStyles filename="nifty-default-styles.xml" />
-  <useControls filename="nifty-default-controls.xml" />
-  <screen id="start">
-    <layer id="background" childLayout="center">
-     <!-- <image filename="Interface/start-background.png"></image> -->
-    </layer>
+  <screen id="start" controller="mygame.controllers.MainMenuScreenStateController">
+<!--    <layer id="background" childLayout="center">
+    </layer>-->
     <layer id="foreground" childLayout="vertical">
-      <panel id="panel_top" height="75%" width="75%" align="center" childLayout="center">
-        <text text="Fairy Fight" font="Interface/Fonts/Default.fnt" width="100%" height="100%" />
-      </panel>
-      <!--panel id="panel_mid" height="50%" width="75%" align="center" childLayout="center">
-        <text text="Here goes some text describing the game and the rules and stuff. Incidentally, the text is quite long and needs to wrap at the end of lines. ..." font="Interface/Fonts/Default.fnt" width="100%" height="100%" wrap="true" />
-      </panel-->
-      <panel id="panel_bottom" height="25%" width="75%" align="center" childLayout="horizontal" >
-        <panel id="panel_bottom_left" height="50%" width="50%" valign="center" childLayout="center">
-          <control name="button" label="Start" id="StartButton" align="center" valign="center"></control>
+      <panel id="credits_panel_all" width="*" height="*" childLayout="vertical" backgroundColor="#FFFF">
+        <panel id="panel_top" height="60%" width="*" align="center" childLayout="horizontal" valign="center" backgroundColor="#FFFFFF">
+           <panel width="*" />
+           <panel width="80%" childLayout="vertical" visibleToMouse="false">
+              <panel height="*" />
+              <panel width="*" height="80%" childLayout="center">
+                <image filename="Interface/FFtitle-transparent.png"></image> 
+              </panel>
+              <panel height="*" />
+           </panel>
+           <panel width="*" />
         </panel>
-        <panel id="panel_bottom_right" height="50%" width="50%" valign="center" childLayout="center">
-          <control name="button" label="Quit" id="QuitButton" align="center" valign="center"></control>
-        </panel>
-      </panel>
-    </layer>
-  </screen>
-  <screen id="hud">
-    <layer id="background" childLayout="center">
-      <!-- <image filename="Interface/hud-frame.png"></image> -->
-    </layer>
-    <layer id="foreground" childLayout="horizontal">
-      <panel id="panel_left" width="80%" height="100%" childLayout="vertical" ></panel>
-      <panel id="panel_right" width="20%" height="100%" childLayout="vertical">
-        <panel id="panel_top_right1" width="100%" height="15%" childLayout="center">
-          <control name="label" color="#000" text="123" width="100%" height="100%" />
-        </panel>
-        <panel id="panel_top_right2" width="100%" height="15%" childLayout="center">
-          <!-- <image filename="Interface/face1.png" valign="center" align="center" height="50%" width="30%" ></image> -->
-        </panel>
-        <panel id="panel_bot_right" width="100%" height="70%" valign="center" ></panel>
+
+        <panel id="panel_bottom" width="*" height="40%" childLayout="vertical" valign="center">
+
+            <panel id="panel_bottom_top" width="100%" height="30%" childLayout="horizontal">
+                <panel width="*" />
+                <panel width="50%" height="*" childLayout="center" backgroundColor="#00FF00" visibleToMouse="true">
+                    <control name="button" label="Start" id="StartButton" align="center" valign="center" style="custom-button">
+                        <interact onClick="startGame()"/>
+                    </control>
+                </panel>
+                <panel width="*" />
+            </panel>
+            <panel height="*" />          
+            
+            <panel id="panel_bottom_middle" width="100%" height="30%" childLayout="horizontal">
+                <panel width="*" />
+                <panel width="50%" height="*" childLayout="center" backgroundColor="#FFFF00" visibleToMouse="true">
+                    <control name="button" label="Credits" id="CreditsButton" align="center" valign="center" style="custom-button">
+                        <interact onClick="loadCreditsScreen()"/>
+                    </control>
+                </panel>
+                <panel width="*" />
+            </panel>
+            <panel height="*" />
+            
+            <panel id="panel_bottom_bottom" width="100%" height="30%" childLayout="horizontal">
+                <panel width="*" />
+                <panel width="50%" height="*" childLayout="center" backgroundColor="#FF0000" visibleToMouse="true">
+                    <control name="button" label="Quit" id="QuitButton" align="center" valign="center" style="custom-button">
+                        <interact onClick="quitGame()"/>
+                    </control>
+                </panel>
+                <panel width="*" />
+            </panel>
+            <panel height="*" />
+        </panel> 
+
       </panel>
     </layer>
   </screen>

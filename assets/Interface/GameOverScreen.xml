@@ -9,7 +9,7 @@
     <!-- +++++++++++++++++++++++++++++++++++++++ -->
   <screen id="gameover" controller="mygame.controllers.GameOverScreenStateController">
     <layer id="credits_foreground" childLayout="vertical">
-      <panel id="credits_panel_all" width="*" height="*" childLayout="vertical">
+      <panel id="credits_panel_all" width="*" height="*" childLayout="vertical" backgroundColor="#000F">
         <panel id="credits_panel_top" height="20%" width="*" align="center" valign="center" childLayout="horizontal" backgroundColor="#000F">
             <panel width="*" />
             <panel width="80%" childLayout="vertical" visibleToMouse="false">
@@ -21,7 +21,7 @@
             </panel>
             <panel width="*" />
         </panel>
-        <panel id="credits_panel_middle" height="60%" width="*" align="center" childLayout="horizontal" backgroundColor="#FFFF">
+        <panel id="credits_panel_middle" height="60%" width="*" align="center" childLayout="horizontal" backgroundColor="#000F">
           <panel width="*" />
           <panel id="credits_panel_middle_top" height="100%" width="80%" valign="center" childLayout="vertical">
             <panel height="*" />

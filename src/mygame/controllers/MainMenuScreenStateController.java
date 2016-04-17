@@ -12,6 +12,7 @@ import com.jme3.scene.Node;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
+import mygame.Game;
 import mygame.Main;
 
 public class MainMenuScreenStateController extends AbstractAppState implements ScreenController {
@@ -95,13 +96,19 @@ public class MainMenuScreenStateController extends AbstractAppState implements S
     public void onEndScreen() {
         System.out.println("onEndScreen - main menu");
     }
+    
+    public void startGame() {
+        System.out.println("before start game");
+        AppStateManager sm = game.getStateManager();
+//        sm.detach(sm.getState(MainMenuScreenStateController.class));
+        Game newGame = new Game(game);
+        sm.attach(new InGameScreenStateController(game, newGame));
+        nifty.gotoScreen("ingame");
+        System.out.println("after start game");
+    }
 
     public void quitGame(){
-        System.out.println("before quit!");
-        
         game.stop();
-        
-        System.out.println("after quit!");
     }
     
     public void loadCreditsScreen() { 
