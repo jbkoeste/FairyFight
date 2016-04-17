@@ -176,63 +176,64 @@ public class pYListener extends RigidBodyControl
         switch (powerUpNr) {
             case 1:
                 if (playerNr == 1) {
-                    specialBoolP1 = true;
+                    this.setSpecialP1(true);
                 } else {
-                    specialBoolP2 = true;
+                    this.setSpecialP2(true);
+                    System.out.println(specialBoolP2);
                 }
                 break;
             case 2:
-                if (playerNr == 1) {
-                   
-                } else {
-                   
-                }
+   
+                   decHealth(getNode(playerNr));
+
                 break;
             case 3:
-                if (playerNr == 1) {
-                   
-                } else {
-                    
-                }
+
+                   incHealth(getNode(playerNr));
+
                 break;
             case 4:
                 if (playerNr == 1) {
-                    
+                    incHealth(getNode(playerNr));
                 } else {
                    
                 }
                 break;
             case 5:
                 if (playerNr == 1) {
-                    
+                    incHealth(getNode(playerNr));
                 } else {
                     
                 }
                 break;
             case 6:
                 if (playerNr == 1) {
-                    
+                    incHealth(getNode(playerNr));
                 } else {
                     
                 }
                 break;
         }
     }
-
+public Node getNode(int playerNr){
+    Node n = (Node)rootNode.getChild("Node_Player"+playerNr);
+            return n;
+}
     public Boolean getSpecialP1() {
-        return specialBoolP1;
+        return this.specialBoolP1;
     }
 
     public void setSpecialP1(Boolean value) {
-        specialBoolP1 = value;
+        this.specialBoolP1 = value;
     }
 
     public Boolean getSpecialP2() {
-        return specialBoolP2;
+       
+        return this.specialBoolP2;
     }
 
     public void setSpecialP2(Boolean value) {
-        specialBoolP2 = value;
+        this.specialBoolP2 = value;
     }
 
     public void resetPlayer() {
@@ -250,7 +251,8 @@ public class pYListener extends RigidBodyControl
 
     public void incHealth(Geometry playerNode) {
         setUserHealth(playerNode, getUserHealth(playerNode) + 1);
-
+        buildBase(getNode(1));
+        buildBase(getNode(2));
 
     }
 
@@ -272,13 +274,20 @@ public class pYListener extends RigidBodyControl
 
     public void incHealth(Node playerNode) {
         setUserHealth(playerNode, getUserHealth(playerNode) + 1);
+         buildBase(getNode(1));
+        buildBase(getNode(2));
+        resetPlayer();
     }
 
     public void decHealth(Node playerNode) {
         setUserHealth(playerNode, getUserHealth(playerNode) - 1);
+        buildBase(getNode(1));
+        buildBase(getNode(2));
+        resetPlayer();
         if (getUserHealth(playerNode) <= 0) {
             bulletAppState.getPhysicsSpace().remove(playerNode.getControl(RigidBodyControl.class));
             playerNode.removeFromParent();
+            
         }
     }
 
@@ -336,8 +345,9 @@ public class pYListener extends RigidBodyControl
             }
         } else if (getUserHealth(playerNode) == 2) {
             if (playerNode.getName().equals("Node_Player1") == true) {
-
+                
                 if ((field2Pl2).getParent() == null) {
+                    System.out.println("dazu");
                     RigidBodyControl rb = new RigidBodyControl(0);
                     field2Pl2.addControl(rb);
                     bulletAppState.getPhysicsSpace().add(field2Pl2);

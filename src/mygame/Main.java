@@ -26,10 +26,12 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Sphere;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
+import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
@@ -43,7 +45,7 @@ import java.util.logging.Logger;
  * @author normenhansen
  */
 public class Main extends SimpleApplication {
-
+    private Nifty nifty;
     public float fieldX = 8;
     public float fieldRatio = 0.75f;
     public float fieldY = fieldX * fieldRatio;
@@ -96,6 +98,7 @@ public class Main extends SimpleApplication {
     private long specialTimeP2;
     private long powerUpTime;
     long powerUpDownTime;
+    private String shootStr = "Shoot";
     ParticleEmitter fire;
     pYListener pY;
 
@@ -172,8 +175,9 @@ public class Main extends SimpleApplication {
             }
         } else if (getUserHealth(playerNode) == 2) {
             if (playerNode.getName().equals("Node_Player1") == true) {
-
+                
                 if ((field2Pl2).getParent() == null) {
+                    System.out.println("dazu");
                     RigidBodyControl rb = new RigidBodyControl(0);
                     field2Pl2.addControl(rb);
                     bulletAppState.getPhysicsSpace().add(field2Pl2);
@@ -236,6 +240,7 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
+       
         powerUpNode = new Node("PowerUpNode");
         rootNode.attachChild(powerUpNode);
         random1 = (int) (Math.random() * 10) % 3;
@@ -333,6 +338,11 @@ public class Main extends SimpleApplication {
         resetPlayer();
         spawnPowerUp();
         powerUpDownTime = System.currentTimeMillis();
+        
+        
+        Spatial model = assetManager.loadModel("Models/model.max"); 
+        
+        rootNode.attachChild(model);
     }
 
     public void setOffset(int direction, int life) {
@@ -400,7 +410,7 @@ public class Main extends SimpleApplication {
             }
 
 
-            if (name.equals("ShootP1") && !keyPressed) {
+            if (name.equals(shootStr+"P1") && !keyPressed) {
                 float shotAngle = 0;
                 if (angleLeftP1 == true) {
                     shotAngle = -0.5f;
@@ -414,7 +424,7 @@ public class Main extends SimpleApplication {
                     Geometry bullet = makeShotP1(shotAngle);
 
                     if (pY.getSpecialP1() == true) {
-                     
+
                         specialGeom = (bullet);
                     }
                     shootPauseP1 = true;
@@ -423,7 +433,7 @@ public class Main extends SimpleApplication {
                 }
             }
 
-            if (name.equals("ShootP2") && !keyPressed) {
+            if (name.equals(shootStr+"P2") && !keyPressed) {
                 float shotAngle = 0;
                 if (angleLeftP2 == true) {
                     shotAngle = -0.5f;
@@ -434,7 +444,7 @@ public class Main extends SimpleApplication {
                 }
                 if (shootPauseP2 == false) {
                     Geometry bullet = makeShotP2(shotAngle);
-
+                    System.out.println(pY.getSpecialP2());
                     if (pY.getSpecialP2() == true) {
                         specialGeom = (bullet);
                     }
@@ -480,33 +490,36 @@ public class Main extends SimpleApplication {
     public void spawnPowerUp() {
         powerUpTime = System.currentTimeMillis();
         int randomPl1 = (int) ((Math.random() * 6) + 1);
-        int randomXPl1 = (int) ((Math.random() * fieldX*2-2) + 1);
+        int randomXPl1 = (int) ((Math.random() * fieldX * 2 - 2) + 1);
         int randomPl2 = (int) ((Math.random() * 6) + 1);
-        int randomXPl2 = (int) ((Math.random() * fieldX*2-2) + 1);
-        createPowerUp(randomXPl1-fieldX+1, 1.5f, -8, randomPl1);
-        createPowerUp(randomXPl2-fieldX+1, 1.5f, 24, randomPl2);
+        int randomXPl2 = (int) ((Math.random() * fieldX * 2 - 2) + 1);
+        createPowerUp(randomXPl1 - fieldX + 1, 1.5f, -8, randomPl1);
+        createPowerUp(randomXPl2 - fieldX + 1, 1.5f, 24, randomPl2);
     }
-public void checkPowerUpTime(){
-    long timer = System.currentTimeMillis()-powerUpTime;
-    if(timer > 4000){
-        int size = powerUpNode.getChildren().size();
-       for(int i = 0; i<size;i++){
-           
-           removeAll((Geometry)powerUpNode.getChild(0));
-       }
-       //powerUpDownTime = System.currentTimeMillis();
-       powerUpSpawnTimer();
+
+    public void checkPowerUpTime() {
+        long timer = System.currentTimeMillis() - powerUpTime;
+        if (timer > 2000) {
+            int size = powerUpNode.getChildren().size();
+            for (int i = 0; i < size; i++) {
+
+                removeAll((Geometry) powerUpNode.getChild(0));
+            }
+            //powerUpDownTime = System.currentTimeMillis();
+            powerUpSpawnTimer();
+        }
+
     }
-    
-}
-public void powerUpSpawnTimer(){
-    long timer = System.currentTimeMillis()-powerUpDownTime;
-    
-    if(timer > 8000){
-        spawnPowerUp();
-        powerUpDownTime= System.currentTimeMillis();
+
+    public void powerUpSpawnTimer() {
+        long timer = System.currentTimeMillis() - powerUpDownTime;
+
+        if (timer > 2000) {
+            spawnPowerUp();
+            powerUpDownTime = System.currentTimeMillis();
+        }
     }
-}
+
     public void createPowerUp(float x, float z, float y, int powerUpInt) {
         String powerUpName = "";
         switch (powerUpInt) {
@@ -547,7 +560,8 @@ public void powerUpSpawnTimer(){
     }
 
     private void setUpSpecialCamera(Geometry followNode) {
-       
+        
+       shootStr = "";
         specialSpeed = 0.1f;
         specialSpeedChar = 0.03f;
         cam.setLocation(new Vector3f(0, 35, 0));
@@ -557,20 +571,26 @@ public void powerUpSpawnTimer(){
         long timeP2 = System.currentTimeMillis() - specialTimeP2;
         int timer = 5000;
         String name = followNode.getName();
-        
-        int playerNr = Integer.parseInt(name.substring(name.length()-1, name.length()));
-    
-        
-        if (followNode.getParent() == null || (playerNr == 1 &&( timeP1 > timer)) ||(playerNr == 2 && (timeP2 > timer)) ){
-         
+
+        int playerNr = Integer.parseInt(name.substring(name.length() - 1, name.length()));
+
+
+        if (followNode.getParent() == null || (playerNr == 1 && (timeP1 > timer)) || (playerNr == 2 && (timeP2 > timer))) {
+              shootPauseP1 = false;
+        shootPauseP2 = false;
             setUpCamera();
-            if(playerNr ==1)pY.setSpecialP1(false);
-            if(playerNr ==2)pY.setSpecialP2(false);
+            if (playerNr == 1) {
+                pY.setSpecialP1(false);
+            }
+            if (playerNr == 2) {
+                pY.setSpecialP2(false);
+            }
             specialSpeed = 1f;
             specialSpeedChar = 1f;
-            specialTimeP1 = 0;
-            specialTimeP2= 0;
-            followNode = null;
+             shootStr = "Shoot";
+            //specialTimeP1 = 0;
+            //specialTimeP2= 0;
+           specialGeom= null;
         }
     }
 
@@ -895,13 +915,13 @@ public void powerUpSpawnTimer(){
 
         if (pY.getSpecialP1() == true || pY.getSpecialP2() == true) {
             if (specialGeom != null) {
-             
+               
                 setUpSpecialCamera(specialGeom);
             }
         }
 
         checkPowerUpTime();
-       
+
         long timeSpentP1 = System.currentTimeMillis() - timeP1;
         if (timeSpentP1 > shootFrequency) {
             shootPauseP1 = false;
