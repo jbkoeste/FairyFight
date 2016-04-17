@@ -58,6 +58,7 @@ public class Main extends SimpleApplication {
     private Node player2;
     private float moveSpeed = 50;
     private float shootSpeed = 50;
+    private float specialSpeed = 1f;
     private int offsetP1 = 0;
     private boolean shootPauseP1 = false;
     private long timeP1 = 0;
@@ -86,7 +87,15 @@ public class Main extends SimpleApplication {
     private int random1;
     private int random3;
     private int random2;
+    private Geometry specialGeom;
+    private Boolean specialBoolP1 = false;
+    private Boolean specialBoolP2 = false;
+    private float specialSpeedChar = 1f;
+    private long specialTimeP1;
+    private long specialTimeP2;
+     
     ParticleEmitter fire;
+
     public static void main(String[] args) {
         Main app = new Main();
         app.start();
@@ -113,8 +122,13 @@ public class Main extends SimpleApplication {
         bulletAppState.getPhysicsSpace().remove(removeNode);
     }
 
+    public void removeRigid(Geometry removeNode) {
+        // removeNode.removeControl(RigidBodyControl.class);
+        bulletAppState.getPhysicsSpace().remove(removeNode);
+    }
+
     public void removeAll(Geometry removeNode) {
-        System.out.println("removeg");
+
         bulletAppState.getPhysicsSpace().remove(removeNode);
         removeNode.removeControl(RigidBodyControl.class);
 
@@ -220,9 +234,9 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleInitApp() {
 
-        random1 = (int)(Math.random()*10)%3;
-        random2 = (int)(Math.random()*10)%3;
-        random3 = (int)(Math.random()*10)%3;
+        random1 = (int) (Math.random() * 10) % 3;
+        random2 = (int) (Math.random() * 10) % 3;
+        random3 = (int) (Math.random() * 10) % 3;
         // MainMenu m = new MainMenu(assetManager,rootNode,guiViewPort,inputManager);
         rootNode.attachChild(shot);
         bulletAppState = new BulletAppState();
@@ -308,8 +322,8 @@ public class Main extends SimpleApplication {
         rootNode.attachChild(shootSoundP1);
 
         gameSound.play();
-        if(random3 == 0){
-        emitterTest();
+        if (random3 == 0) {
+            emitterTest();
         }
         setUpCamera();
         resetPlayer();
@@ -390,7 +404,10 @@ public class Main extends SimpleApplication {
                     shotAngle = 0;
                 }
                 if (shootPauseP1 == false) {
-                    makeShotP1(shotAngle);
+                    specialBoolP1 = true;
+                    Geometry bullet = makeShotP1(shotAngle);
+                    
+                    specialGeom = (bullet);
                     shootPauseP1 = true;
 
                     timeP1 = System.currentTimeMillis();
@@ -445,6 +462,26 @@ public class Main extends SimpleApplication {
         flyCam.setEnabled(false);
         cam.setLocation(new Vector3f(0, 28, 35));
         cam.lookAt(new Vector3f(0, 0, 10), Vector3f.UNIT_Y);
+    }
+
+    private void setUpSpecialCamera(Geometry followNode) {
+        specialSpeed = 0.1f;
+        specialSpeedChar = 0.03f;
+        cam.setLocation(new Vector3f(0, 35, 0));
+
+        cam.lookAt(followNode.getWorldTranslation(), Vector3f.UNIT_Y);
+        long timeP1 = System.currentTimeMillis()-specialTimeP1;
+        long timeP2 = System.currentTimeMillis()-specialTimeP2;
+        int timer = 5000;
+       
+        if (followNode.getParent() == null ||  timeP1 > timer ){
+            System.out.println("Cam");
+            setUpCamera();
+            specialBoolP1 = false;
+            specialBoolP2 = false;
+            specialSpeed = 1f;
+            specialSpeedChar = 1f;
+        }
     }
 
     private void setUpKeys() {
@@ -559,7 +596,8 @@ public class Main extends SimpleApplication {
 
         return field;
     }
-public void emitterTest() {
+
+    public void emitterTest() {
         fire = new ParticleEmitter("Emitter", ParticleMesh.Type.Triangle, 1000);
         Material mat_red = new Material(assetManager, "Common/MatDefs/Misc/Particle.j3md");
         fire.setShape(new EmitterSphereShape(Vector3f.ZERO, 25f));
@@ -589,6 +627,7 @@ public void emitterTest() {
         fire.updateGeometricState();
 
     }
+
     public Node createField(float x, float z, float y) {
         Node field = new Node("field");
         Geometry fieldBottomPlayer1 = createBox(fieldX, 1, fieldY / 3, "Field_p1");
@@ -596,7 +635,7 @@ public void emitterTest() {
 
         Material tex_mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         String str = "";
-        switch(random1){
+        switch (random1) {
             case 0:
                 str = "gras";
                 break;
@@ -607,7 +646,7 @@ public void emitterTest() {
                 str = "ziegel";
                 break;
         }
-        TextureKey key = new TextureKey("Textures/"+str+".png");
+        TextureKey key = new TextureKey("Textures/" + str + ".png");
         key.setGenerateMips(true);
         Texture tex2 = assetManager.loadTexture(key);
         tex_mat.setTexture("ColorMap", tex2);
@@ -675,7 +714,7 @@ public void emitterTest() {
 
         Material tex_mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         String str = "";
-        switch(random1){
+        switch (random1) {
             case 0:
                 str = "ziegel";
                 break;
@@ -686,7 +725,7 @@ public void emitterTest() {
                 str = "gras";
                 break;
         }
-        TextureKey key = new TextureKey("Textures/"+str+".png");
+        TextureKey key = new TextureKey("Textures/" + str + ".png");
         key.setGenerateMips(true);
         Texture tex2 = assetManager.loadTexture(key);
         tex_mat.setTexture("ColorMap", tex2);
@@ -764,7 +803,9 @@ public void emitterTest() {
     @Override
     public void simpleUpdate(float tpf) {
 
-
+        if (specialBoolP1 == true||specialBoolP2 == true) {
+            setUpSpecialCamera(specialGeom);
+        }
 
 
 
@@ -785,29 +826,29 @@ public void emitterTest() {
         walkDirectionP2.set(0, 0, 0);
 
         if (leftP1) {
-            walkDirectionP1.addLocal(new Vector3f(-10, 0, 0));
+            walkDirectionP1.addLocal(new Vector3f(-10 * specialSpeedChar, 0, 0));
         }
         if (leftP2) {
-            walkDirectionP2.addLocal(new Vector3f(-10, 0, 0));
+            walkDirectionP2.addLocal(new Vector3f(-10 * specialSpeedChar, 0, 0));
         }
         if (rightP1) {
-            walkDirectionP1.addLocal(new Vector3f(10, 0, 0));
+            walkDirectionP1.addLocal(new Vector3f(10 * specialSpeedChar, 0, 0));
         }
         if (rightP2) {
-            walkDirectionP2.addLocal(new Vector3f(10, 0, 0));
+            walkDirectionP2.addLocal(new Vector3f(10 * specialSpeedChar, 0, 0));
         }
         if (upP1) {
-            walkDirectionP1.addLocal(new Vector3f(0, 0, -10));
+            walkDirectionP1.addLocal(new Vector3f(0, 0, -10 * specialSpeedChar));
             // character1.warp();
         }
         if (upP2) {
-            walkDirectionP2.addLocal(new Vector3f(0, 0, -10));
+            walkDirectionP2.addLocal(new Vector3f(0, 0, -10 * specialSpeedChar));
         }
         if (downP1) {
-            walkDirectionP1.addLocal(new Vector3f(0, 0, 10));
+            walkDirectionP1.addLocal(new Vector3f(0, 0, 10 * specialSpeedChar));
         }
         if (downP2) {
-            walkDirectionP2.addLocal(new Vector3f(0, 0, 10));
+            walkDirectionP2.addLocal(new Vector3f(0, 0, 10 * specialSpeedChar));
         }
 
         character1.setWalkDirection(walkDirectionP1);
@@ -843,6 +884,16 @@ public void emitterTest() {
             collision.playInstance();
             resetPlayer();
         }
+
+        BoundingVolume bvShot = deathNode.getWorldBound();
+        results = new CollisionResults();
+        shot.collideWith(bvShot, results);
+        if (results.size() > 0) {
+            Geometry geom = results.getClosestCollision().getGeometry();
+            removeAll(geom);
+            // removeRigid(geom);
+
+        }
         // }
     }
 
@@ -851,7 +902,12 @@ public void emitterTest() {
         //TODO: add render code
     }
 
-    public void makeShotP1(float shotAngle) {
+    public Geometry makeShotP1(float shotAngle) {
+
+        if (specialBoolP1 == true) {
+            specialSpeed = 0.1f;
+            specialTimeP1 = System.currentTimeMillis();
+        }
         shootSoundP1.playInstance(); //sound
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setColor("Color", ColorRGBA.White);
@@ -859,21 +915,23 @@ public void emitterTest() {
         // sphere.setTextureMode(Sphere.TextureMode.Projected);
         Geometry ball_geo = new Geometry("cannon ball", sphere);
         ball_geo.setMaterial(mat);
-
-        //rootNode.attachChild();
-
         ball_geo.setLocalTranslation(player1.getWorldTranslation().addLocal(0, 1f, 2.5f));
-
         RigidBodyControl ball_phy = new RigidBodyControl(0.1f);
-
         ball_geo.addControl(ball_phy);
         bulletAppState.getPhysicsSpace().add(ball_phy);
         Vector3f shootDirection = new Vector3f(shotAngle, 0, 1);
-        ball_phy.setLinearVelocity(shootDirection.mult(shootSpeed));
+        ball_phy.setLinearVelocity(shootDirection.mult(shootSpeed * specialSpeed));
+        ball_phy.setGravity(Vector3f.ZERO);
         shot.attachChild(ball_geo);
+        return ball_geo;
     }
 
-    public void makeShotP2(float shotAngle) {
+    public Geometry makeShotP2(float shotAngle) {
+        
+        if (specialBoolP2 == true) {
+            specialSpeed = 0.1f;
+            specialTimeP2 = System.currentTimeMillis();
+        }
         shootSoundP2.playInstance(); //sound    
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setColor("Color", ColorRGBA.White);
@@ -890,8 +948,9 @@ public void emitterTest() {
         ball_geo.addControl(ball_phy);
         bulletAppState.getPhysicsSpace().add(ball_phy);
         Vector3f shootDirection = new Vector3f(shotAngle, 0, -1);
-        ball_phy.setLinearVelocity(shootDirection.mult(shootSpeed));
-
+        ball_phy.setLinearVelocity(shootDirection.mult(shootSpeed * specialSpeed));
+        ball_phy.setGravity(Vector3f.ZERO);
+        return ball_geo;
     }
 
     public int getUserHealth(Node playerNode) {
