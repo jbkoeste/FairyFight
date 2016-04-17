@@ -56,6 +56,7 @@ public class Main extends SimpleApplication {
     BetterCharacterControl character1;
     BetterCharacterControl character2;
     private Node player2;
+    private Node powerUpNode;
     private float moveSpeed = 50;
     private float shootSpeed = 50;
     private float specialSpeed = 1f;
@@ -93,7 +94,6 @@ public class Main extends SimpleApplication {
     private float specialSpeedChar = 1f;
     private long specialTimeP1;
     private long specialTimeP2;
-     
     ParticleEmitter fire;
 
     public static void main(String[] args) {
@@ -233,7 +233,8 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-
+        powerUpNode = new Node("PowerUpNode");
+        rootNode.attachChild(powerUpNode);
         random1 = (int) (Math.random() * 10) % 3;
         random2 = (int) (Math.random() * 10) % 3;
         random3 = (int) (Math.random() * 10) % 3;
@@ -275,7 +276,7 @@ public class Main extends SimpleApplication {
 
         character2 = new BetterCharacterControl(1f, 2, 100);
         player2 = (createPlayer(character2, "Player2", new Vector3f(0, 3f, 12)));
-        pYListener pY = new pYListener(bulletAppState, rootNode, character1, character2, field1Pl1, field2Pl1, field3Pl1, field1Pl2, field2Pl2, field3Pl2, assetManager);
+        pYListener pY = new pYListener(bulletAppState, rootNode, character1, character2, field1Pl1, field2Pl1, field3Pl1, field1Pl2, field2Pl2, field3Pl2, assetManager,specialBoolP1,specialBoolP2);
 
         shot.addControl(pY);
 
@@ -327,6 +328,7 @@ public class Main extends SimpleApplication {
         }
         setUpCamera();
         resetPlayer();
+        spawnPowerUp();
     }
 
     public void setOffset(int direction, int life) {
@@ -404,10 +406,10 @@ public class Main extends SimpleApplication {
                     shotAngle = 0;
                 }
                 if (shootPauseP1 == false) {
-                    specialBoolP1 = true;
+                    //specialBoolP1 = true;
                     Geometry bullet = makeShotP1(shotAngle);
-                    
-                    specialGeom = (bullet);
+
+                    if(specialBoolP1==true)specialGeom = (bullet);
                     shootPauseP1 = true;
 
                     timeP1 = System.currentTimeMillis();
@@ -424,7 +426,9 @@ public class Main extends SimpleApplication {
                     shotAngle = 0;
                 }
                 if (shootPauseP2 == false) {
-                    makeShotP2(shotAngle);
+                    Geometry bullet = makeShotP2(shotAngle);
+
+                    if(specialBoolP2==true)specialGeom = (bullet);
                     shootPauseP2 = true;
 
                     timeP2 = System.currentTimeMillis();
@@ -463,6 +467,52 @@ public class Main extends SimpleApplication {
         cam.setLocation(new Vector3f(0, 28, 35));
         cam.lookAt(new Vector3f(0, 0, 10), Vector3f.UNIT_Y);
     }
+public void spawnPowerUp(){
+    int randomPl1 =(int)((Math.random() * 6) + 1);
+    int randomXPl1 = (int)((Math.random() * fieldX) + 1);
+    int randomPl2 =(int)((Math.random() * 6) + 1);
+    int randomXPl2 = (int)((Math.random() * fieldX) + 1);
+    createPowerUp(randomXPl1,1.5f,-8,randomPl1);
+    createPowerUp(randomXPl2,1.5f,24,randomPl2);
+}
+    public void createPowerUp(float x, float z, float y, int powerUpInt) {
+        String powerUpName = "";
+        switch (powerUpInt) {
+            case 1:
+                powerUpName = "Power1";
+                break;
+
+            case 2:
+                powerUpName = "Power2";
+                break;
+                
+            case 3:
+                powerUpName = "Power3";
+                break;
+                
+            case 4:
+                powerUpName = "Power4";
+                break;
+                
+            case 5:
+                powerUpName = "Power5";
+                break;
+            case 6:
+                powerUpName = "Power6";
+            break;
+
+        }
+        Geometry powerUp = createBox(0.5f, 0.5f, 0.5f, powerUpName);
+        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setColor("Color", ColorRGBA.Pink);
+        powerUp.setMaterial(mat);
+        powerUp.setName(powerUpName);
+        powerUp.setLocalTranslation(x, z, y);
+        RigidBodyControl rb = new RigidBodyControl(0);
+        powerUp.addControl(rb);
+        bulletAppState.getPhysicsSpace().add(powerUp);
+        powerUpNode.attachChild(powerUp);
+    }
 
     private void setUpSpecialCamera(Geometry followNode) {
         specialSpeed = 0.1f;
@@ -470,11 +520,11 @@ public class Main extends SimpleApplication {
         cam.setLocation(new Vector3f(0, 35, 0));
 
         cam.lookAt(followNode.getWorldTranslation(), Vector3f.UNIT_Y);
-        long timeP1 = System.currentTimeMillis()-specialTimeP1;
-        long timeP2 = System.currentTimeMillis()-specialTimeP2;
+        long timeP1 = System.currentTimeMillis() - specialTimeP1;
+        long timeP2 = System.currentTimeMillis() - specialTimeP2;
         int timer = 5000;
-       
-        if (followNode.getParent() == null ||  timeP1 > timer ){
+
+        if (followNode.getParent() == null || timeP1 > timer) {
             System.out.println("Cam");
             setUpCamera();
             specialBoolP1 = false;
@@ -803,7 +853,7 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleUpdate(float tpf) {
 
-        if (specialBoolP1 == true||specialBoolP2 == true) {
+        if (specialBoolP1 == true || specialBoolP2 == true) {
             setUpSpecialCamera(specialGeom);
         }
 
@@ -894,6 +944,17 @@ public class Main extends SimpleApplication {
             // removeRigid(geom);
 
         }
+       /* 
+        BoundingVolume bvPower = powerUpNode.getWorldBound();
+        results = new CollisionResults();
+        shot.collideWith(bvPower, results);
+        if (results.size() > 0) {
+            System.out.println("0");
+            Geometry geom = results.getClosestCollision().getGeometry();
+            removeAll(geom);
+            // removeRigid(geom);
+
+        }*/
         // }
     }
 
@@ -913,7 +974,7 @@ public class Main extends SimpleApplication {
         mat.setColor("Color", ColorRGBA.White);
         Sphere sphere = new Sphere(10, 10, 0.5f, true, false);
         // sphere.setTextureMode(Sphere.TextureMode.Projected);
-        Geometry ball_geo = new Geometry("cannon ball", sphere);
+        Geometry ball_geo = new Geometry("cannon ball1", sphere);
         ball_geo.setMaterial(mat);
         ball_geo.setLocalTranslation(player1.getWorldTranslation().addLocal(0, 1f, 2.5f));
         RigidBodyControl ball_phy = new RigidBodyControl(0.1f);
@@ -927,7 +988,7 @@ public class Main extends SimpleApplication {
     }
 
     public Geometry makeShotP2(float shotAngle) {
-        
+
         if (specialBoolP2 == true) {
             specialSpeed = 0.1f;
             specialTimeP2 = System.currentTimeMillis();
@@ -937,7 +998,7 @@ public class Main extends SimpleApplication {
         mat.setColor("Color", ColorRGBA.White);
         Sphere sphere = new Sphere(10, 10, 0.5f, true, false);
         // sphere.setTextureMode(Sphere.TextureMode.Projected);
-        Geometry ball_geo = new Geometry("cannon ball", sphere);
+        Geometry ball_geo = new Geometry("cannon ball2", sphere);
         ball_geo.setMaterial(mat);
         shot.attachChild(ball_geo);
 
