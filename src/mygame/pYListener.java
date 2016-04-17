@@ -183,37 +183,37 @@ public class pYListener extends RigidBodyControl
                 break;
             case 2:
                 if (playerNr == 1) {
-                    specialBoolP1 = true;
+                   
                 } else {
-                    specialBoolP2 = true;
+                   
                 }
                 break;
             case 3:
                 if (playerNr == 1) {
-                    specialBoolP1 = true;
+                   
                 } else {
-                    specialBoolP2 = true;
+                    
                 }
                 break;
             case 4:
                 if (playerNr == 1) {
-                    specialBoolP1 = true;
+                    
                 } else {
-                    specialBoolP2 = true;
+                   
                 }
                 break;
             case 5:
                 if (playerNr == 1) {
-                    specialBoolP1 = true;
+                    
                 } else {
-                    specialBoolP2 = true;
+                    
                 }
                 break;
             case 6:
                 if (playerNr == 1) {
-                    specialBoolP1 = true;
+                    
                 } else {
-                    specialBoolP2 = true;
+                    
                 }
                 break;
         }
